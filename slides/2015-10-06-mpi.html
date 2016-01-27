@@ -1,0 +1,230 @@
+---
+layout: slide
+title: CS 5220
+description: MPI programming
+theme: simple
+audio: http://www.cs.cornell.edu/~bindel/audio/2015-10-06-mpi/
+transition: slide
+js: js/quiz.js
+---
+
+<section data-markdown>
+# CS 5220
+## Distributed memory
+### MPI
+## 06 Oct 2015
+</section>
+
+
+<section data-markdown>
+### Message passing programming
+
+Basic operations:
+
+-   Pairwise messaging: send/receive
+-   Collective messaging: broadcast, scatter/gather
+-   Collective computation: sum, max, other parallel prefix ops
+-   Barriers (no need for locks!)
+-   Environmental inquiries (who am I? do I have mail?)
+
+(Much of what follows is adapted from Bill Gropp’s material.)
+</section>
+
+
+<section data-markdown>
+### MPI
+
+-   Message Passing Interface
+-   An interface spec — many implementations
+-   Bindings to C, C++, Fortran
+</section>
+
+
+<section data-markdown>
+### Hello world
+
+    #include &lt;mpi.h&gt;
+    #include &lt;stdio.h&gt;
+
+    int main(int argc, char** argv) {
+        int rank, size;
+        MPI_Init(&argc, &argv);
+        MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+        MPI_Comm_size(MPI_COMM_WORLD, &size);
+        printf("Hello from %d of %d\n", rank, size);
+        MPI_Finalize();
+        return 0;
+    }
+</section>
+
+
+<section data-markdown>
+### Communicators
+
+-   Processes form *groups*
+-   Messages sent in *contexts*
+    -   Separate communication for libraries
+-   Group + context = communicator
+-   Identify process by rank in group
+-   Default is `MPI_COMM_WORLD`
+</section>
+
+
+<section data-markdown>
+### Sending and receiving
+
+Need to specify:
+
+-   What’s the data?
+    -   Different machines use different encodings (e.g. endian-ness)
+    -   $\implies$ “bag o’ bytes” model is inadequate
+-   How do we identify processes?
+-   How does receiver identify messages?
+-   What does it mean to “complete” a send/recv?
+</section>
+
+
+<section data-markdown>
+### MPI datatypes
+
+Message is (address, count, datatype). Allow:
+
+-   Basic types (`MPI_INT`, `MPI_DOUBLE`)
+-   Contiguous arrays
+-   Strided arrays
+-   Indexed arrays
+-   Arbitrary structures
+
+Complex data types may hurt performance?
+</section>
+
+
+<section data-markdown>
+### MPI tags
+
+Use an integer *tag* to label messages
+
+-   Help distinguish different message types
+-   Can screen messages with wrong tag
+-   `MPI_ANY_TAG` is a wildcard
+</section>
+
+
+<section data-markdown>
+### MPI Send/Recv
+
+Basic blocking point-to-point communication:
+
+    int 
+    MPI_Send(void *buf, int count, 
+             MPI_Datatype datatype, 
+             int dest, int tag, MPI_Comm comm);
+
+    int 
+    MPI_Recv(void *buf, int count,
+             MPI_Datatype datatype,
+             int source, int tag, MPI_Comm comm, 
+             MPI_Status *status);
+</section>
+
+
+<section data-markdown>
+### MPI send/recv semantics
+
+-   Send returns when data gets to *system*
+    -   ... might not yet arrive at destination!
+-   Recv ignores messages that don’t match source and tag
+    -   `MPI_ANY_SOURCE` and `MPI_ANY_TAG` are wildcards
+-   Recv status contains more info (tag, source, size)
+</section>
+
+
+<section data-markdown>
+### Ping-pong pseudocode
+
+Process 0:
+
+    for i = 1:ntrials
+      send b bytes to 1
+      recv b bytes from 1
+    end
+
+Process 1:
+
+    for i = 1:ntrials
+      recv b bytes from 0
+      send b bytes to 0
+    end
+</section>
+
+
+<section data-markdown>
+### Ping-pong MPI
+
+    void ping(char* buf, int n, int ntrials, int p)
+    {
+        for (int i = 0; i &lt; ntrials; ++i) {
+            MPI_Send(buf, n, MPI_CHAR, p, 0, 
+                     MPI_COMM_WORLD);
+            MPI_Recv(buf, n, MPI_CHAR, p, 0, 
+                     MPI_COMM_WORLD, NULL);
+        }
+    }
+
+(Pong is similar)
+</section>
+
+
+<section data-markdown>
+### Ping-pong MPI
+
+    for (int sz = 1; sz &lt;= MAX_SZ; sz += 1000) {
+        if (rank == 0) {
+            clock_t t1, t2;
+            t1 = clock();
+            ping(buf, sz, NTRIALS, 1);
+            t2 = clock();
+            printf("%d %g\n", sz, 
+                   (double) (t2-t1)/CLOCKS_PER_SEC);
+        } else if (rank == 1) {
+            pong(buf, sz, NTRIALS, 0);
+        }
+    }
+</section>
+
+
+<section data-markdown>
+### Running the code
+
+On my laptop (OpenMPI)
+
+    mpicc -std=c99 pingpong.c -o pingpong.x
+    mpirun -np 2 ./pingpong.x
+
+Details vary, but this is pretty normal.
+</section>
+
+
+<section data-markdown>
+<h3>Approximate $\alpha$-$\beta$ parameters (Macbook with OpenMPI)</h3>
+
+<img width="80%" src="/img/pingpong/macbook.svg"></img><br/>
+</section>
+
+
+<section data-markdown>
+### Where we are now
+
+Can write a lot of MPI code with 6 operations we’ve seen:
+
+-   `MPI_Init`
+-   `MPI_Finalize`
+-   `MPI_Comm_size`
+-   `MPI_Comm_rank`
+-   `MPI_Send`
+-   `MPI_Recv`
+
+... but there are sometimes better ways.
+
+Next time: non-blocking and collective operations!
+</section>

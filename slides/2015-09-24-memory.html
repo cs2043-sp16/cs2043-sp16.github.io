@@ -1,0 +1,154 @@
+---
+layout: slide
+title: CS 5220
+description: Shared memory issues
+theme: simple
+audio: http://www.cs.cornell.edu/~bindel/audio/2015-09-24-memory/
+transition: slide
+js: js/quiz.js
+---
+
+<section data-markdown>
+# CS 5220
+## Shared memory
+### Memory issues
+## 24 Sep 2015
+</section>
+
+
+<section data-markdown>
+### Memory model
+
+-   Single processor: return last write
+    -   What about DMA and memory-mapped I/O?
+-   Simplest generalization: *sequential consistency* – as if
+    -   Each process runs in program order
+    -   Instructions from different processes are interleaved
+    -   Interleaved instructions ran on one processor
+</section>
+
+
+<section>
+<h3>Sequential consistency</h3>
+
+<blockquote style="text-align:left;">
+A multiprocessor is sequentially consistent if the result of any
+execution is the same as if the operations of all the processors were
+executed in some sequential order, and the operations of each
+individual processor appear in this sequence in the order specified by
+its program.<br/>
+<div style="float:right;">– Lamport, 1979</div>
+</blockquote>
+
+</section>
+
+
+<section data-markdown>
+### Example: Spin lock
+
+Initially, `flag = 0` and `sum = 0`
+
+    // Processor 1:
+    sum += p1;
+    flag = 1;
+
+    // Processor 2:
+    while (!flag);
+    sum += p2;
+</section>
+
+<section data-markdown>
+### Example: Spin lock
+
+Initially, `flag = 0` and `sum = 0`
+
+    // Processor 1:
+    sum += p1;
+    flag = 1;
+
+    // Processor 2:
+    while (!flag);
+    sum += p2;
+
+Without sequential consistency support, what if
+
+1.  Processor 2 caches `flag`?
+2.  Compiler optimizes away loop?
+3.  Compiler reorders assignments on P1?
+
+Starts to look restrictive!
+</section>
+
+
+<section data-markdown>
+### Sequential consistency:
+### the good, the bad, the ugly
+
+- Program behavior is “intuitive”:
+  -   Nobody sees garbage values
+  -   Time always moves forward
+- One issue is *cache coherence*:
+  -   Coherence: different copies, same value
+  -   Requires (nontrivial) hardware support
+- Also an issue for optimizing compiler!
+- There are cheaper *relaxed* consistency models.
+</section>
+
+
+<section data-markdown>
+### Snoopy bus protocol
+
+- Basic idea:
+  -   Broadcast operations on memory bus
+  -   Cache controllers “snoop” on all bus transactions
+    -   Memory writes induce serial order
+    -   Act to enforce coherence (invalidate, update, etc)
+- Problems:
+  -   Bus bandwidth limits scaling
+  -   Contending writes are slow
+- There are other protocol options (e.g. directory-based).
+- But usually give up on *full* sequential consistency.
+</section>
+
+
+<section data-markdown>
+### Weakening sequential consistency
+
+Try to reduce to the *true* cost of sharing
+
+-   `volatile` tells compiler when to worry about sharing
+-   Memory fences tell when to force consistency
+-   Synchronization primitives (lock/unlock) include fences
+</section>
+
+
+<section data-markdown>
+### Sharing
+
+True sharing:
+
+-   Frequent writes cause a bottleneck.
+-   Idea: make independent copies (if possible).
+-   Example problem: `malloc`/`free` data structure.
+
+False sharing:
+
+-   Distinct variables on same cache block
+-   Idea: make processor memory contiguous (if possible)
+-   Example problem: array of ints, one per processor
+</section>
+
+
+<section data-markdown>
+### Take-home message
+
+-   Sequentially consistent shared memory is a useful idea...
+    -   “Natural” analogue to serial case
+    -   Architects work hard to support it
+-   ... but implementation is costly!
+    -   Makes life hard for optimizing compilers
+    -   Coherence traffic slows things down
+    -   Helps to limit sharing
+
+Have to think about these things to get good performance.
+</section>

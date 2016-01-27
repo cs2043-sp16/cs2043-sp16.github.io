@@ -1,0 +1,119 @@
+# ==================
+# Week 1
+#
+-
+  date: 2016-01-27
+  info: 01 - Introduction
+  week: 1
+  hw:
+    - HW0 out
+  demo:
+    - Virtual Machine creation / usage
+    - Creating a git repository
+-
+  date: 2016-01-29
+  info: '02 - The Unix file system'
+#
+# ==================
+# Week 2
+#
+-
+  date: 2016-02-01
+  info: '03 - Making bash work for you'
+  hw:
+    - HW0 due
+  week: 2
+-
+  date: 2016-02-03
+  info: '04 - More Unix tools'
+  misc:
+    - Last day to add.
+-
+  date: 2016-02-05
+  info: '05 - Processes and jobs'
+#
+# ==================
+# Week 3
+#
+-
+  date: 2016-02-08
+  info: '06 - Regular expressions'
+  week: 3
+-
+  date: 2016-02-10
+  info: '07 - Working with streams'
+  misc:
+    - Last day to drop.
+-
+  date: 2016-02-12
+  info: '08 - Vim, Tmux and screens'
+#
+# ==================
+# Week 4
+#
+-
+  date: 2016-02-15
+  break: February Break
+  week: 4
+-
+  date: 2016-02-17
+  info: '09 - Shell scripting I'
+-
+  date: 2016-02-19
+  info: '10 - Shell scripting II'
+#
+# ==================
+# Week 5
+#
+-
+  date: 2016-02-22
+  info: '11 - Awk and gawk'
+  week: 5
+-
+  date: 2016-02-24
+  info: '12 - Python I'
+-
+  date: 2016-02-26
+  info: '13 - Python II'
+#
+# ==================
+# Week 6
+#
+-
+  date: 2016-02-29
+  info: '14 - Sockets and automation'
+  week: 6
+-
+  date: 2016-03-02
+  info: '15 - Bash revisited'
+-
+  date: 2016-03-04
+  info: '16 - Make, version control revisited'
+#
+# ==================
+# Week 7
+#
+-
+  date: 2016-03-07
+  info: '17 - Package management'
+  week: 7
+-
+  date: 2016-03-09
+  info: '18 - Conclusions'
+-
+  date: 2016-03-11
+  info: 'Additional Material: TBD'
+#
+# ==================
+# Week 8
+#
+-
+  date: 2016-03-14
+  info: 'No class'
+  week: 8
+-
+  date: 2016-03-16
+  info: 'No class'
+-
+  date: 2016-03-18
+  info: 'No class'

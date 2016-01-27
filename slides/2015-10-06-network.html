@@ -1,0 +1,209 @@
+---
+layout: slide
+title: CS 5220
+description: Distributed memory
+theme: simple
+audio: http://www.cs.cornell.edu/~bindel/audio/2015-10-06-network/
+transition: slide
+js: js/quiz.js
+---
+
+<section data-markdown>
+# CS 5220
+## Distributed memory
+### Networks and models
+## 06 Oct 2015
+</section>
+
+
+<section data-markdown>
+### Basic questions
+
+- How much does a message cost?
+  -   *Latency*: time to get between processors
+  -   *Bandwidth*: data transferred per unit time
+  -   How does *contention* affect communication?
+- This is a combined hardware-software question!
+- We want to understand just enough for reasonable modeling.
+</section>
+
+
+<section data-markdown>
+### Thinking about interconnects
+
+Several features characterize an interconnect:
+
+-   *Topology*: who do the wires connect?
+-   *Routing*: how do we get from A to B?
+-   *Switching*: circuits, store-and-forward?
+-   *Flow control*: how do we manage limited resources?
+</section>
+
+
+<section data-markdown>
+### Thinking about interconnects
+
+-   Links are like streets
+-   Switches are like intersections
+-   Hops are like blocks traveled
+-   Routing algorithm is like a travel plan
+-   Stop lights are like flow control
+-   Short packets are like cars, long ones like buses?
+
+At some point the analogy breaks down...
+</section>
+
+
+<section>
+<h3>Bus topology</h3>
+
+<img width="60%" src="/img/topology/l7bus.svg"></img><br/>
+
+<ul>
+<li>One set of wires (the bus)</li>
+<li>
+  Only one processor allowed at any given time
+  <ul>
+    <li><em>Contention</em> for the bus is an issue</li>
+  </ul>
+</li>
+<li>Example: basic Ethernet, some SMPs</li>
+</ul>
+</section>
+
+
+<section>
+<h3>Crossbar</h3>
+
+<img width="40%" src="/img/topology/l7xbar.svg"></img><br/>
+
+<ul>
+<li>Dedicated path from every input to every output
+    <ul><li>Takes $O(p^2)$ switches and wires!</li></ul>
+</li>
+</ul>
+
+</section>
+
+
+<section data-markdown>
+### Bus vs. crossbar
+
+-   Crossbar: more hardware
+-   Bus: more contention (less capacity?)
+-   Generally seek happy medium
+    -   Less contention than bus
+    -   Less hardware than crossbar
+    -   May give up one-hop routing
+</section>
+
+
+<section data-markdown>
+### Network properties
+
+Think about latency and bandwidth via two quantities:
+
+-   *Diameter*: max distance between nodes
+-   *Bisection bandwidth*: smallest bandwidth cut to bisect
+    -   Particularly important for all-to-all communication
+</section>
+
+
+<section>
+<h3>Linear topology</h3>
+
+<img width="40%" src="/img/topology/l7linear.svg"></img><br/>
+
+<ul>
+<li>$p-1$ links</li>
+<li>Diameter $p-1$</li>
+<li>Bisection bandwidth $1$</li>
+</ul>
+
+</section>
+
+<section>
+<h3>Ring topology</h3>
+
+<img width="40%" src="/img/topology/l7ring.svg"></img><br/>
+
+<ul>
+<li>$p$ links</li>
+<li>Diameter $p/2$</li>
+<li>Bisection bandwidth $2$</li>
+</ul>
+</section>
+
+
+<section>
+<h3>Mesh</h3>
+
+<img width="40%" src="/img/topology/l7mesh.svg"></img><br/>
+
+<ul>
+<li>May be more than two dimensions</li>
+<li>Route along each dimension in turn</li>
+</ul>
+
+</section>
+
+
+<section>
+<h3>Torus<h3>
+
+<img width="40%" src="/img/topology/l7torus.svg"></img><br/>
+
+<p>
+  Torus : Mesh :: Ring : Linear
+</p>
+</section>
+
+
+<section>
+<h3>Hypercube</h3>
+
+<img width="40%" src="/img/topology/l7cube.svg"></img><br/>
+
+<ul>
+<li>Label processors with binary numbers</li>
+<li>Connect $p_1$ to $p_2$ if labels differ in one bit</li>
+</ul>
+</section>
+
+
+<section>
+<h3>Fat tree</h3>
+
+<img width="40%" src="/img/topology/l7fattree.svg"></img><br/>
+
+<ul>
+<li>Processors at leaves</li>
+<li>Increase link bandwidth near root</li>
+</ul>
+</section>
+
+
+<section data-markdown>
+### Others...
+
+-   Butterfly network
+-   Omega network
+-   Cayley graph
+</section>
+
+
+<section data-markdown>
+### Conventional wisdom
+
+-   Roughly constant latency (?)
+    -   Wormhole routing (or cut-through) flattens latencies vs
+        store-forward at hardware level
+    -   Software stack dominates HW latency!
+    -   Latencies *not* same between networks (in box vs
+        across)
+    -   May also have store-forward at library level
+-   Avoid topology-specific optimization
+    -   Want code that runs on next year’s machine, too!
+    -   Bundle topology awareness in vendor MPI libraries?
+    -   Sometimes specify a *software* topology
+</section>

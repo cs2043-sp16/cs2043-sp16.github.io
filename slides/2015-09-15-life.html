@@ -1,0 +1,121 @@
+---
+layout: slide
+title: CS 5220
+description: Game of Life
+theme: simple
+audio: http://www.cs.cornell.edu/~bindel/audio/2015-09-15-life/
+transition: slide
+js: js/quiz.js
+---
+
+<section data-markdown>
+# CS 5220
+## Parallelism and locality in simulation
+### Life
+## 15 Sep 2015
+</section>
+
+
+<section data-markdown>
+### Discrete events
+
+Basic setup:
+
+-   Finite set of variables, updated via transition function
+-   *Synchronous* case: finite state machine
+-   *Asynchronous* case: event-driven simulation
+-   Synchronous example: Game of Life
+
+Nice starting point — no discretization concerns!
+</section>
+
+
+<section>
+<h3>Game of Life</h3>
+
+<img style="background-color: white;" width="60%" src="/img/life/life.svg"></img>
+
+<p style="text-align:left;">
+Game of Life (John Conway):
+</p>
+<ol>
+<li>Live cell dies with &lt; 2 live neighbors</li>
+<li>Live cell dies with &gt; 3 live neighbors</li>
+<li>Live cell lives with 2–3 live neighbors</li>
+<li>Dead cell becomes live with exactly 3 live neighbors</li>
+</ol>
+</section>
+
+
+<section>
+<h3>Game of Life</h3>
+
+<img style="background-color: white;" width="35%" src="/img/life/dd0.svg"></img>
+
+<p>Easy to parallelize by domain decomposition.</p>
+
+<ul>
+<li>Update work involves volume of subdomains</li>
+<li>Communication per step on surface (cyan)</li>
+</ul>
+</section>
+
+
+<section data-markdown>
+### Game of Life: Pioneers and Settlers
+
+What if pattern is “dilute”?
+
+-   Few or no live cells at surface at each step
+-   Think of live cell at a surface as an “event”
+-   Only communicate events!
+    -   This is *asynchronous*
+    -   Harder with message passing — when do you receive?
+</section>
+
+
+<section data-markdown>
+### Asynchronous Game of Life
+
+How do we manage events?
+
+-   Could be *speculative* — assume no communication across
+    boundary for many steps, back up if needed
+-   Or *conservative* — wait whenever communication
+    possible
+    -   possible $\not \equiv$ guaranteed!
+    -   Deadlock: everyone waits for everyone else to send
+    -   Can get around this with NULL messages
+
+How do we manage load balance?
+
+-   No need to simulate quiescent parts of the game!
+-   Maybe dynamically assign smaller blocks to processors?
+</section>
+
+
+<section data-markdown>
+### High-Performance Game of Life
+
+ - Lots of implementations use fancy bit representations
+ - [Ch 17](http://downloads.gamedev.net/pdf/gpbb/gpbb17.pdf) and
+   [Ch 18](http://downloads.gamedev.net/pdf/gpbb/gpbb18.pdf) of
+   Abrash's _Game Programmer's Black Book_ have an old, but still
+   illuminating discussion of low-level (serial) optimizations
+ - [HashLife](https://en.wikipedia.org/wiki/Hashlife) is a triumph
+   of algorithm design.
+</section>
+
+
+<section data-markdown>
+### High-Performance Game of Life
+
+How would I tackle this?  Assuming matrix version, I might:
+
+ - Build a bit-packed representation
+ - Use a fast vectorized kernel to update small blocks
+ - Coarse blocking with generation skipping
+ - Dynamic scheduling of coarse block updates
+
+What would you do?
+</section>

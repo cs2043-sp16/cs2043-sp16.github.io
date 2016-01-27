@@ -1,0 +1,347 @@
+---
+layout: slide
+title: CS 5220
+description: MPI programming
+theme: simple
+audio: http://www.cs.cornell.edu/~bindel/audio/2015-10-08-mpi/
+transition: slide
+js: js/quiz.js
+---
+
+<section data-markdown>
+# CS 5220
+## Distributed memory
+### MPI
+## 08 Oct 2015
+</section>
+
+
+<section data-markdown>
+### Previously on Parallel Programming
+
+Can write a lot of MPI code with 6 operations we’ve seen:
+
+-   `MPI_Init`
+-   `MPI_Finalize`
+-   `MPI_Comm_size`
+-   `MPI_Comm_rank`
+-   `MPI_Send`
+-   `MPI_Recv`
+
+... but there are sometimes better ways. Decide on communication style
+using simple performance models.
+</section>
+
+
+<section data-markdown>
+### Reminder: basic send and recv
+
+    MPI_Send(buf, count, datatype, 
+             dest, tag, comm);
+
+    MPI_Recv(buf, count, datatype,
+             source, tag, comm, status);
+
+`MPI_Send` and `MPI_Recv` are *blocking*
+
+-   Send does not return until data is in system
+-   Recv does not return until data is ready
+</section>
+
+
+<section>
+<h3>Blocking and buffering</h3>
+
+<img width="70%" src="/img/mpi/l8buffers.svg"></img><br/>
+
+<p>Block until data <q>in system</q> — maybe in a buffer?</p>
+</section>
+
+
+<section>
+<h3>Blocking and buffering</h3>
+
+<img width="70%" src="/img/mpi/l8nbuffers.svg"></img><br/>
+
+<p>Alternative: don’t copy, block until done.</p>
+</section>
+
+
+<section>
+<h3>Problem 1: Potential deadlock</h3>
+
+<img width="70%" src="/img/mpi/l8dead.svg"></img><br/>
+
+<p>
+Both processors wait to finish send before they can receive!  
+May not happen if lots of buffering on both sides.
+</p>
+</section>
+
+
+<section>
+<h3>Solution 1: Alternating order</h3>
+
+<img width="40%" src="/img/mpi/l8sendrecv1.svg"></img><br/>
+
+<p>
+  Could alternate who sends and who receives.
+</p>
+</section>
+
+
+<section>
+<h3>Solution 2: Combined send/recv</h3>
+
+<img width="40%" src="/img/mpi/l8sendrecvs.svg"></img><br/>
+
+<p>
+  Common operations deserve explicit support!
+</p>
+</section>
+
+
+<section data-markdown>
+### Combined sendrecv
+
+    MPI_Sendrecv(sendbuf, sendcount, sendtype,
+                 dest, sendtag, 
+                 recvbuf, recvcount, recvtype, 
+                 source, recvtag,
+                 comm, status);
+
+Blocking operation, combines send and recv to avoid deadlock.
+</section>
+
+
+<section>
+<h3>Problem 2: Communication overhead</h3>
+
+<img width="40%" src="/img/mpi/l8sendrecvs.svg"></img><br/>
+
+<p>
+  Partial solution: nonblocking communication
+</p>
+</section>
+
+
+<section data-markdown>
+### Blocking vs non-blocking communication
+
+-   `MPI_Send` and `MPI_Recv` are *blocking*
+    -   Send does not return until data is in system
+    -   Recv does not return until data is ready
+    -   Cons: possible deadlock, time wasted waiting
+-   Why blocking?
+    -   Overwrite buffer during send $\implies$ evil!
+    -   Read buffer before data ready $\implies$ evil!
+-   Alternative: *nonblocking* communication
+    -   Split into distinct initiation/completion phases
+    -   Initiate send/recv and promise not to touch buffer
+    -   Check later for operation completion
+</section>
+
+
+<section>
+<h3>Overlap communication and computation</h3>
+
+<img width="80%" src="/img/mpi/l8nbsendrecvs.svg"></img><br/>
+</section>
+
+
+<section data-markdown>
+### Nonblocking operations
+
+Initiate message:
+
+    MPI_Isend(start, count, datatype, dest
+              tag, comm, request);
+    MPI_Irecv(start, count, datatype, dest
+              tag, comm, request);
+
+Wait for message completion:
+
+    MPI_Wait(request, status);
+
+Test for message completion:
+
+    MPI_Test(request, status);
+</section>
+
+
+<section data-markdown>
+### Multiple outstanding requests
+
+Sometimes useful to have multiple outstanding messages:
+
+    MPI_Waitall(count, requests, statuses);
+    MPI_Waitany(count, requests, index, status);
+    MPI_Waitsome(count, requests, indices, statuses);
+
+Multiple versions of test as well.
+</section>
+
+
+<section data-markdown>
+### Other send/recv variants
+
+Other variants of `MPI_Send`
+
+-   `MPI_Ssend` (synchronous) – complete after receive begun
+-   `MPI_Bsend` (buffered) – user provides buffer
+    - via `MPI_Buffer_attach`
+-   `MPI_Rsend` (ready) – must have receive already posted
+-   Can combine modes (e.g. `MPI_Issend`)
+
+`MPI_Recv` receives anything.
+</section>
+
+
+<section data-markdown>
+### Another approach
+
+-   Send/recv is one-to-one communication
+-   An alternative is one-to-many (and vice-versa):
+    -   *Broadcast* to distribute data from one process
+    -   *Reduce* to combine data from all processors
+    -   Operations are called by all processes in communicator
+</section>
+
+
+<section data-markdown>
+### Broadcast and reduce
+
+    MPI_Bcast(buffer, count, datatype,
+              root, comm);
+    MPI_Reduce(sendbuf, recvbuf, count, datatype,
+               op, root, comm);
+
+-   `buffer` is copied from root to others
+-   `recvbuf` receives result only at root
+-   `op` is `MPI_MAX`, `MPI_SUM`, etc
+</section>
+
+
+<section data-markdown>
+### Example: basic Monte Carlo
+
+    #include &lt;stdio.h&gt;
+    #include &lt;mpi.h&gt;
+    int main(int argc, char** argv) {
+        int nproc, myid, ntrials;
+        MPI_Init(&argc, &argv);
+        MPI_Comm_size(MPI_COMM_WORLD, &nproc);
+        MPI_Comm_rank(MPI_COMM_WORLD, &my_id);
+        if (myid == 0) {
+            printf("Trials per CPU:\n");
+            scanf("%d", &ntrials);
+        }
+        MPI_Bcast(&ntrials, 1, MPI_INT, 
+                  0, MPI_COMM_WORLD);
+        run_trials(myid, nproc, ntrials);
+        MPI_Finalize();
+        return 0;
+    }
+</section>
+
+
+<section data-markdown>
+### Example: basic Monte Carlo
+
+Let sum[0] = $\sum_i X_i$ and sum[1] =
+$\sum_i X_i^2$.
+
+    void run_mc(int myid, int nproc, int ntrials) {
+        double sums[2] = {0,0};
+        double my_sums[2] = {0,0};
+        /* ... run ntrials local experiments ... */
+        MPI_Reduce(my_sums, sums, 2, MPI_DOUBLE, 
+                   MPI_SUM, 0, MPI_COMM_WORLD);
+        if (myid == 0) {
+            int N = nproc*ntrials;
+            double EX = sums[0]/N;
+            double EX2 = sums[1]/N;
+            printf("Mean: %g; err: %g\n", 
+                   EX, sqrt((EX*EX-EX2)/N));
+        }
+    }
+</section>
+
+
+<section data-markdown>
+### Collective operations
+
+-   Involve all processes in communicator
+-   Basic classes:
+    -   Synchronization (e.g. barrier)
+    -   Data movement (e.g. broadcast)
+    -   Computation (e.g. reduce)
+</section>
+
+
+<section data-markdown>
+### Barrier
+
+    MPI_Barrier(comm);
+
+Not much more to say. Not needed that often.
+</section>
+
+
+<section>
+<h3>Broadcast</h3>
+
+<img width="80%" src="/img/mpi/l8bcast.svg"></img><br/>
+</section>
+
+
+<section>
+<h3>Scatter/gather</h3>
+
+<img width="80%" src="/img/mpi/l8scatter.svg"></img><br/>
+</section>
+
+
+<section>
+<h3>Allgather</h3>
+
+<img width="80%" src="/img/mpi/l8allgather.svg"></img><br/>
+</section>
+
+
+<section>
+<h3>Alltoall</h3>
+
+<img width="80%" src="/img/mpi/l8alltoall.svg"></img><br/>
+</section>
+
+
+<section>
+<h3>Reduce</h3>
+
+<img width="80%" src="/img/mpi/l8reduce.svg"></img><br/>
+</section>
+
+
+<section>
+<h3>Scan</h3>
+
+<img width="80%" src="/img/mpi/l8scan.svg"></img><br/>
+</section>
+
+
+<section data-markdown>
+### The kitchen sink
+
+-   In addition to above, have vector variants (v suffix),
+    more All variants (`Allreduce`),
+    `Reduce_scatter`, ...
+-   MPI3 adds one-sided communication (put/get)
+-   MPI is *not* a small library!
+-   But a small number of calls goes a long way
+    -   `Init`/`Finalize`
+    -   `Get_comm_rank`, `Get_comm_size`
+    -   `Send`/`Recv` variants and `Wait`
+    -   `Allreduce`, `Allgather`, `Bcast`
+
+</section>

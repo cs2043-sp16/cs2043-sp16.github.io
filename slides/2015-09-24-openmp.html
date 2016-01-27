@@ -1,0 +1,358 @@
+---
+layout: slide
+title: CS 5220
+description: OpenMP programming
+theme: simple
+audio: http://www.cs.cornell.edu/~bindel/audio/2015-09-24-openmp/
+transition: slide
+js: js/quiz.js
+---
+
+<section data-markdown>
+# CS 5220
+## Shared memory
+### OpenMP
+## 24 Sep 2015
+</section>
+
+
+<section data-markdown>
+### Shared memory programming model
+
+Program consists of *threads* of control.
+
+-   Can be created dynamically
+-   Each has private variables (e.g. local)
+-   Each has shared variables (e.g. heap)
+-   Communication through shared variables
+-   Coordinate by synchronizing on variables
+-   Examples: *OpenMP*, pthreads, Cilk, Java threads
+</section>
+
+
+<section data-markdown>
+### The problem with pthreads revisited
+
+- pthreads can be painful!
+   -   Makes code verbose
+   -   Synchronization is hard to think about
+- Would like to make this more automatic!
+   -   ... and have been trying for a couple decades.
+   -   OpenMP gets us <span>*part*</span> of the way
+</section>
+
+
+<section data-markdown>
+### OpenMP: Open spec for MultiProcessing
+
+-   Standard API for multi-threaded code
+    -   Only a spec — multiple implementations
+    -   Lightweight syntax
+    -   C or Fortran (with appropriate compiler support)
+-   High level:
+    -   Preprocessor/compiler directives (80%)
+    -   Library calls (19%)
+    -   Environment variables (1%)
+</section>
+
+
+<section>
+<h3>Compiling OpenMP</h3>
+
+<p>
+A practical aside...
+</p>
+
+<ul>
+<li>OpenMP is supported by Intel and GCC</li>
+<li><em>Not</em> in main Clang release</li>
+<li>I use GCC from Homebrew for OpenMP on OS X</li>
+<li>GCC: Need <tt>-fopenmp</tt> for both compile and link lines
+<pre><code class="nohighlight" data-trim>
+gcc -fopenmp -c foo.c
+gcc -fopenmp -o mycode.x foo.o
+</code></pre>
+</li>
+<li>Intel: Need <tt>-openmp</tt> for both compile and link lines
+<pre><code class="nohighlight" data-trim>
+icc -openmp -c foo.c
+icc -openmp -o mycode.x foo.o
+</code></pre>
+</li>
+</ul>
+</section>
+
+
+<section data-markdown>
+### Parallel “hello world”
+
+    #include &lt;stdio.h&gt;
+    #include &lt;omp.h&gt;
+
+    int main()
+    {
+        #pragma omp parallel
+        printf("Hello world from %d\n", 
+               omp_get_thread_num());
+
+        return 0;
+    }  
+</section>
+
+
+<section>
+<h3>Parallel sections</h3>
+
+<img width="80%" src="/img/shared/ompsec.svg"></img><br/>
+
+<ul>
+<li>Basic model: fork-join</li>
+<li>Each thread runs same code block</li>
+<li>Annotations distinguish shared ($s$) and private ($i$) data</li>
+<li><b>Relaxed consistency</b> for shared data</li>
+</ul>
+</section>
+
+
+<section>
+<h3>Parallel sections</h3>
+
+<img width="80%" src="/img/shared/ompsec.svg"></img><br/>
+
+<pre><code data-trim>
+double s[MAX_THREADS];
+int i;
+#pragma omp parallel shared(s) private(i)
+{
+  i = omp_get_thread_num();
+  s[i] = i;
+}    
+</code></pre>
+</section>
+
+
+<section>
+  <h3>Critical sections</h3>
+  
+  <img width="80%" src="/img/shared/mutex.svg"></img><br/>
+
+  <ul>
+    <li>Automatically lock/unlock at ends of <b>critical section</b></li>
+    <li>Automatically memory flushes for consistency</li>
+    <li>Locks are still there if you really need them...</li>
+  </ul>
+</section>
+
+
+<section>
+  <h3>Critical sections</h3>
+  
+  <img width="80%" src="/img/shared/mutex.svg"></img><br/>
+
+<pre><code data-trim>
+#pragma omp parallel {
+  //...
+  #pragma omp critical my_data_cs
+  {
+    //... modify data structure here ...
+  }
+}
+</code></pre>
+</section>
+
+
+<section>
+  <h3>Barriers</h3>
+  
+  <img width="80%" src="/img/shared/barrier.svg"></img><br/>
+
+<pre><code data-trim>
+#pragma omp parallel
+for (i = 0; i < nsteps; ++i) {
+  do_stuff();
+  #pragma omp barrier
+}
+</code></pre>
+</section>
+
+<section>
+  <h3>Parallel loops</h3>
+
+  <img width="80%" src="/img/shared/omploop.svg"></img><br/>
+
+  <ul>
+    <li>Independent loop body? At least order doesn’t matter.</li>
+    <li>Partition index space among threads</li>
+    <li>Implicit barrier at end (except with <tt>nowait</tt>)</li>
+  </ul>
+</section>
+
+
+<section data-markdown>
+### Parallel loops
+
+    /* Compute dot of x and y of length n */
+    int i, tid;
+    double my_dot, dot = 0;
+    #pragma omp parallel \
+            shared(dot,x,y,n) \
+            private(i,my_dot)
+    {
+      tid = omp_get_thread_num();
+      my_dot = 0;
+     
+      #pragma omp for
+      for (i = 0; i < n; ++i)
+        my_dot += x[i]*y[i];
+
+      #pragma omp critical
+      dot += my_dot;
+    }
+</section>
+
+<section data-markdown>
+### Parallel loops
+
+    /* Compute dot of x and y of length n */
+    int i, tid;
+    double dot = 0;
+    #pragma omp parallel \
+            shared(x,y,n) \
+            private(i) \
+            reduction(+:dot)
+    {
+      #pragma omp for
+      for (i = 0; i < n; ++i)
+        dot += x[i]*y[i];
+    }
+</section>
+
+<section data-markdown>
+### Parallel loop scheduling
+
+Partition index space different ways:
+
+-   `static[(chunk)]`: decide at start of loop; default chunk
+    is `n/nthreads`. Low overhead, potential load imbalance.
+-   `dynamic[(chunk)]`: each thread takes `chunk`
+    iterations when it has time; default `chunk` is 1. Higher
+    overhead, but automatically balances load.
+-   `guided`: take chunks of size unassigned
+    iterations/threads; chunks get smaller toward end of loop. Somewhere
+    between `static` and `dynamic`.
+-   `auto`: up to the system!
+
+Default behavior is implementation-dependent.
+</section>
+
+
+<section data-markdown>
+### Other parallel work divisions
+
+-   `single`: do only in one thread (e.g. I/O)
+-   `master`: do only in one thread; others skip
+-   `sections`: like cobegin/coend
+</section>
+
+
+<section data-markdown>
+### Tasks
+
+- So far, very static flavors of parallelism
+- *Tasks* allow more dynamic parallel patterns
+- From OpenMP 3.0 on, [explicit tasking support](http://openmp.org/sc13/sc13.tasking.ruud.pdf)
+</section>
+
+
+<section data-markdown>
+### Tasks
+
+    #pragma omp parallel
+    {
+      #pragma omp single
+      {
+        // General setup work
+
+        #pragma omp task
+        task1();
+
+        #pragma omp task
+        task2();
+
+        #pragma omp taskwait
+        depends_on_both_tasks();
+      }
+    }
+</section>
+
+
+<section data-markdown>
+### Linked list
+
+Adapted from [an SC13
+presentation](http://openmp.org/sc13/sc13.tasking.ruud.pdf)
+
+    node_t* p = head;
+    #pragma omp parallel
+    {
+      #pragma omp single nowait
+      while (p != NULL) {
+        #pragma omp task firstprivate(p)
+        do_work(p);
+
+        p = p->next;
+      }
+    } // Implied barrier at end of parallel region
+</section>
+
+
+<section data-markdown>
+### [Post-order traversal](http://openmp.org/wp/presos/sc07openmpbof.pdf)
+
+    void traverse(node_t* p)
+    {
+        if (p->left)
+            #pragma omp task
+            traverse(p->left);
+        if (p->right)
+            #pragma omp task
+            travers(p->right);
+        #pragma omp taskwait
+        process(p->data);
+    }
+</section>
+
+
+<section>
+<h3>Essential complexity?</h3>
+
+<p style="text-align:left;">
+Fred Brooks
+(<a href="http://www.amazon.com/The-Mythical-Man-Month-Engineering-Anniversary/dp/0201835959">Mythical
+    Man Month</a>) identified two types of
+software complexity: essential and accidental.
+</p>
+
+<p style="text-align:left;">
+Does OpenMP address accidental complexity? Yes, somewhat!
+<p>
+
+<p style="text-align:left;">
+Essential complexity is harder.
+</p>
+
+</section>
+
+
+<section data-markdown>
+### Things to still think about with OpenMP
+
+-   Proper serial performance tuning?
+-   Minimizing false sharing?
+-   Minimizing synchronization overhead?
+-   Minimizing loop scheduling overhead?
+-   Load balancing?
+-   Finding enough parallelism in the first place?
+
+Let’s focus again on memory issues...
+</section>

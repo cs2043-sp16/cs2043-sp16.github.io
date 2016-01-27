@@ -1,0 +1,201 @@
+---
+layout: slide
+title: CS 5220 architecture intro
+description: Matmul tiling
+theme: black
+audio: http://www.cs.cornell.edu/~bindel/audio/2015-09-08-matmul/
+transition: slide
+js: js/quiz.js
+---
+
+
+<section data-markdown>
+# CS 5220: Applications of Parallel Computers
+## Matmul and tiling
+## 08 Sep 2015
+</section>
+
+
+<section data-markdown>
+## A memory benchmark (membench)
+
+    for array A of length L from 4KB to 8MB by 2x
+      for stride s  from 4 bytes to L/2 by 2x
+        time the following loop
+        for i = 0 to L by s
+          load A[i]
+
+</section>
+
+
+<section>
+<h2>Membench in pictures</h2>
+
+<img width="70%" src="/img/matmul/membench-0.png"></img>
+<br/>
+
+<ul>
+  <li>Size = 64 bytes (16 ints)</li>
+  <li>Strides of 4, 8, 16, 32 bytes</li>
+</ul>
+</section>
+
+
+<section>
+<h2>Membench on totient CPU</h2>
+
+<img width="50%" src="/img/matmul/timings-heat.svg"></img>
+
+<ul>
+  <li>Vertical: 64B line size, 4K page size</li>
+  <li>Horizontal: 64KB L1, 256KB L2, 15MB L3</li>
+  <li>Diagonal: 8-way cache associativity, 512 entry L2 TLB</li>
+</ul>
+</section>
+
+
+<section>
+<h2>Note on storage</h2>
+
+<img width="50%" src="/img/matmul/storage-0.png"></img><br/>
+
+<ul>
+  <li>Two standard layouts:
+    <ul>
+    <li>Column major (Fortran): A(i,j) at <tt>A+i+j*n</tt></li>
+    <li>Row-major (C): A(ij) at <tt>A+i*n+j</tt></li>
+    </ul>
+  </li>
+  <li>I default to column major</li>
+  <li>Also note: C has poor language matrix support</li>
+</ul>
+</section>
+
+
+<section data-markdown>
+## Matrix multiply
+
+How fast can naive matrix multiply run?
+
+    #define A(i,j) AA[i+j*n]
+    #define B(i,j) BB[i+j*n]
+    #define C(i,j) CC[i+j*n]
+
+    memset(C, 0, n*n*sizeof(double));
+    for (int i = 0; i < n; ++i)
+        for (int j = 0; j < n; ++j)
+            for (int k = 0; k < n; ++k)
+                C(i,j) += A(i,k) * B(k,j);
+</section>
+
+
+<section>
+<h2>One row in naive</h2>
+
+<img width="70%" src="/img/matmul/matmul-0.png"></img><br/>
+
+<ul>
+  <li>Access $A$ and $C$ with stride $8n$ bytes</li>
+  <li>Access all $8n^2$ bytes of $B$ before first re-use</li>
+  <li>Poor arithmetic intensity</li>
+</ul>
+</section>
+
+
+<section>
+<h2>Matrix multiply compared (Totient + ICC)</h2>
+
+<img width="70%" src="/img/matmul/matmul-totient.svg"></img>
+</section>
+
+
+<section>
+<h2>Hmm...</h2>
+
+<img width="50%" src="/img/matmul/matmul-totient.svg"></img><br/>
+
+<ul>
+  <li>Compiler makes some difference</li>
+  <li>Naive Fortran is faster than naive C</li>
+  <li>Local instruction mix sets <q>speed of light</q></li>
+  <li>Access pattern determines how close we get to limit</li>
+</ul>
+</section>
+
+
+<section>
+<h2>Engineering strategy</h2>
+
+<img width="60%" src="/img/matmul/engineering-0.png"></img><br/>
+
+<ul>
+  <li>Start with small <q>kernel</q> multiply
+  <ul>
+    <li>Maybe odd sizes, strange layouts -- just go fast!</li>
+    <li>May play with AVX intrinsics, compiler flags, etc</li>
+    <li>Deserves its own timing rig</li>
+  </ul>
+  <li>Use blocking based on kernel to improve access pattern</li>
+</ul>
+</section>
+
+
+<section data-markdown>
+## Simple model
+
+- Two types of memory (fast+slow)
+  - $m$ = words read from slow memory
+  - $t_m$ = slow memory op time
+  - $f$ = number of flops
+  - $t_f$ = time per flop
+  - $q = f/m$ = average flops/slow access
+- Time:
+  $$ft_f + mt_m = ft_f \left( 1 + \frac{t_m/t_f}{q} \right)$$
+- Larger $q$ means better time
+</section>
+
+
+<section data-markdown>
+## How big can $q$ be?
+
+Level 1/2/3 Basic Linear Algebra Subroutines (BLAS)
+
+1.  Dot product: $n$ data, $2n$ flops
+2.  Matrix-vector multiply: $n^2$ data, $2n^2$ flops
+3.  Matrix-matrix multiply: $2n^2$ data, $2n^3$ flops
+
+We like to build on level 3 BLAS (like matrix multiplication)!
+</section>
+
+
+<section data-markdown>
+## Tuning matrix multiply
+  
+- [Matmul assignment is up](https://github.com/cornell-cs5220-f15/matmul)
+- You will get email with group assignments
+- Goal is single core performance *analysis* and *tuning*
+- Deliverables
+  - Report describing strategy and performance results
+  - Pointer to a repository so we can run a competition
+</section>
+
+
+<section data-markdown>
+## Possible tactics
+
+- Manually tune some small kernels
+- Write an auto-tuner to sweep parameters
+- Try different compilers (and flags)
+- Try different layouts
+- Copy optimization
+- Study strategies from past/present classes!
+</section>
+
+
+<section data-markdown>
+## Warning
+  
+- Tuning can be like video games!
+- Do spend the time to do a good job
+- Don't get so sucked in you neglect more important things
+</section>

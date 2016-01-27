@@ -1,0 +1,132 @@
+---
+layout: slide
+title: CS 5220
+description: Parallelism and locality in simulation
+theme: simple
+audio: http://www.cs.cornell.edu/~bindel/audio/2015-09-15-sim/
+transition: slide
+js: js/quiz.js
+---
+
+<section data-markdown>
+# CS 5220
+## Parallelism and locality in simulation
+## 15 Sep 2015
+</section>
+
+
+<section data-markdown>
+### Parallelism and locality
+
+-   Real world has *parallelism* and *locality*
+    -   Particles, people, etc function independently
+    -   Near interactions stronger than distant ones
+    -   Can often simplify dependence on distant objects
+-   More parallelism / locality through model
+    -   Limited dependency between adjacent time steps
+    -   Can neglect or approximate far-field effects
+-   Often get parallelism at multiple levels
+    -   Hierarchical circuit simulation
+    -   Interacting models for climate
+    -   Parallelizing trials/fevals in MC or optimization
+</section>
+
+
+<section data-markdown>
+### Common ideas / issues
+
+-   Load balancing
+    -   Imbalance from lack of parallelism, poor distribution
+    -   Can be static or dynamic
+-   Locality
+    -   Want big blocks with low surface-to-volume ratio
+    -   Minimizes communication / computation ratio
+    -   Can generalize ideas to graph setting
+-   Tensions and tradeoffs
+    -   Irregular spatial decompositions for load balance at the cost of
+        complexity, maybe extra communication
+</section>
+
+
+<section>
+<h3>Basic styles of simulation</h3>
+
+<ul>
+<li><a href="/slides/2015-09-15-life.html">Discrete event systems (continuous or discrete time)</a></li>
+<li><a href="/slides/2015-09-15-particle.html">Particle systems</a></li>
+<li><a href="/slides/2015-09-17-lumped.html">Lumped parameter models (ODEs)</a></li>
+<li><a href="/slides/2015-09-17-pde.html">Distributed parameter models (PDEs / integral equations)</a></li>
+</ul>
+
+<p style="text-align:left;">
+Often more than one type of simulation appropriate.<br/>
+Sometimes more than one at a time!
+</p>
+</section>
+
+
+<section>
+<h3>Basic styles of simulation</h3>
+<h4>Discrete event systems</h4>
+
+<img width="40%" src="https://upload.wikimedia.org/wikipedia/commons/e/e5/Gospers_glider_gun.gif"></img><br/>
+
+<ul>
+  <li>Continuous or discrete time</li>
+  <li>Game of life, logic-level circuit simulation</li>
+  <li>Network simulation</li>
+</ul>
+
+</section>
+
+
+<section>
+<h3>Basic styles of simulation</h3>
+<h4>Particle systems</h4>
+
+<img width="40%" src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/9e/Milky_Way_IR_Spitzer.jpg/800px-Milky_Way_IR_Spitzer.jpg"></img><br/>
+
+<ul>
+  <li>Billiards, electrons, galaxies, ...</li>
+  <li>Ants, cars, ...?</li>
+</ul>
+</section>
+
+
+<section>
+<h3>Basic styles of simulation</h3>
+<h4>Lumped parameter models</h4>
+
+<img width="40%" src="https://upload.wikimedia.org/wikipedia/commons/7/7d/RLC_low-pass.svg"></img><br/>
+
+<ul>
+  <li>Systems of Ordinary Differential Equations (ODEs)</li>
+  <li>Circuits (SPICE), structures, chemical kinetics</li>
+</ul>
+</section>
+
+
+<section>
+<h3>Basic styles of simulation</h3>
+<h4>Distributed parameter models</h4>
+
+<img style="background-color: white;" src="/img/checkers2.svg"></img><br/>
+
+<ul>
+<li>PDEs / integral equations</li>
+<li>Heat, elasticity, electrostatics, ...</li>
+</ul>
+</section>
+
+
+<section>
+<h3>What next?</h3>
+
+<ul>
+<li>T: <a href="/slides/2015-09-15-life.html">Discrete event systems</a></li>
+<li>T: <a href="/slides/2015-09-15-particle.html">Particle systems</a></li>
+<li>R: <a href="/slides/2015-09-17-lumped.html">Lumped parameter models</a></li>
+<li>R: <a href="/slides/2015-09-17-pde.html">Distributed parameter models</a></li>
+</ul>
+
+</section>

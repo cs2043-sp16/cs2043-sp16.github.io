@@ -1,0 +1,282 @@
+---
+layout: slide
+title: CS 5220 architecture intro
+description: Matmul tiling
+theme: black
+audio: http://www.cs.cornell.edu/~bindel/audio/2015-09-10-parallel/
+transition: slide
+js: js/quiz.js
+---
+
+
+<section data-markdown>
+# CS 5220: Applications of Parallel Computers
+## Parallel machines and models
+## 10 Sep 2015
+</section>
+
+
+<section data-markdown>
+## Why clusters?
+
+-   Clusters of SMPs are everywhere
+    -   Commodity hardware – economics!
+    -   Supercomputer = cluster + custom interconnect
+    -   Relatively simple to set up and administer (?)
+-   But still costs room, power, ...
+-   Economy of scale $\implies$ clouds?
+    -   Amazon now has HPC instances on EC2
+    -   StarCluster: launch your own EC2 cluster
+    -   Lots of interesting challenges here
+</section>
+
+
+<section data-markdown>
+## Totient structure
+
+Consider:
+-   Each core has vector parallelism
+-   Chips have six cores, shares memory with others
+-   Accelerators have sixty cores, shared memory
+-   Each box has two chips + accelerators
+-   Eight instructional nodes, communicate via Ethernet
+
+How did we get here? Why this type of structure? And how does the
+programming model match the hardware?
+</section>
+
+
+<section data-markdown>
+## Parallel computer hardware
+
+-   Physical machine has *processors*, *memory*, and *interconnect*
+    -   Where is memory physically?
+    -   Is it attached to processors?
+    -   What is the network connectivity?
+-   Programming *model* through languages, libraries.
+    -   Programming model $\neq$ hardware organization!
+    -   Can run MPI on a shared memory node!
+</section>
+
+
+<section data-markdown>
+## Parallel programming model
+
+-   Control
+    -   How is parallelism created?
+    -   What ordering is there between operations?
+-   Data
+    -   What data is private or shared?
+    -   How is data logically shared or communicated?
+-   Synchronization
+    -   What operations are used to coordinate?
+    -   What operations are atomic?
+-   Cost: how do we reason about each of above?
+
+</section>
+
+
+<section data-markdown>
+## Simple example
+
+Consider dot product of $x$ and $y$.
+
+-   Where do arrays $x$ and $y$ live? One CPU? Partitioned?
+-   Who does what work?
+-   How do we combine to get a single final result?
+</section>
+
+
+<section data-markdown>
+## Shared memory programming model
+
+Program consists of *threads* of control.
+
+-   Can be created dynamically
+-   Each has private variables (e.g. local)
+-   Each has shared variables (e.g. heap)
+-   Communication through shared variables
+-   Coordinate by synchronizing on variables
+-   Examples: OpenMP, pthreads
+</section>
+
+
+<section data-markdown>
+## Shared memory dot product
+
+Dot product of two $n$ vectors on $p \ll n$ processors:
+
+1.  Each CPU evaluates partial sum ($n/p$ elements, local)
+2.  Everyone tallies partial sums
+
+Can we go home now?
+</section>
+
+
+<section data-markdown>
+## Race condition
+
+A *race condition*:
+
+-   Two threads access same variable, at least one write.
+-   Access are concurrent – no ordering guarantees
+    -   Could happen simultaneously!
+
+Need synchronization via lock or barrier.
+</section>
+
+
+<section data-markdown>
+## Race to the dot
+
+Consider `S += partial_sum` on 2 CPU:
+
+-   P1: Load `S`
+-   P1: Add `partial_sum`
+-   P2: Load `S`
+-   P1: Store new `S`
+-   P2: Add `partial_sum`
+-   P2: Store new `S`
+</section>
+
+
+<section data-markdown>
+## Shared memory dot with locks
+
+Solution: consider `S += partial_sum` a *critical
+section*
+
+-   Only one CPU at a time allowed in critical section
+-   Can violate invariants locally
+-   Enforce via a lock or mutex (mutual exclusion variable)
+
+Dot product with mutex:
+
+1.  Create global mutex l
+2.  Compute partial_sum
+3.  Lock l
+4.  S += partial_sum
+5.  Unlock l
+</section>
+
+
+<section data-markdown>
+## Shared memory with barriers
+
+-   Many codes have phases (e.g. time steps)
+-   Communication only needed at end of phases
+-   Idea: synchronize on end of phase with *barrier*
+    -   More restrictive (less efficient?) than small locks
+    -   Easier to think through! (e.g. less chance of deadlocks)
+-   Sometimes called *bulk synchronous programming*
+</section>
+
+
+<section data-markdown>
+## Shared memory machine model
+
+-   Processors and memories talk through a bus
+-   Symmetric Multiprocessor (SMP)
+-   Hard to scale to lots of processors (think $\leq 32$)
+    -   Bus becomes bottleneck
+    -   *Cache coherence* is a pain
+-   Example: 6-core chips on cluster
+</section>
+
+
+<section data-markdown>
+## Multithreaded processor machine
+
+-   May have more threads than processors!
+-   Can switch threads on long latency ops
+    -   Cray MTA was an extreme example
+-   Similar to *hyperthreading*
+    -   But hyperthreading doesn’t switch – just schedules multiple
+        threads onto same CPU functional units
+</section>
+
+
+<section data-markdown>
+## Distributed shared memory
+
+-   Non-Uniform Memory Access (NUMA)
+-   Can *logically* share memory while
+    *physically* distributing
+-   Any processor can access any address
+-   Cache coherence is still a pain
+-   Example: SGI Origin (or multiprocessor nodes on cluster)
+</section>
+
+
+<section data-markdown>
+## Message-passing programming model
+
+-   Collection of named processes
+-   Data is *partitioned*
+-   Communication by send/receive of explicit message
+-   Lingua franca: MPI (Message Passing Interface)
+</section>
+
+
+<section data-markdown>
+## Message passing dot product: v1
+
+    Processor 1:                 Processor 2:
+    1.  Partial sum s1           1.  Partial sum s2
+    2.  Send s1 to P2            2.  Send s2 to P1
+    3.  Receive s2 from P2       3.  Receive s1 from P1
+    4.  s = s1 + s2              4.  s = s1 + s2
+
+What could go wrong? Think of phones vs letters...
+</section>
+
+
+<section data-markdown>
+## Message passing dot product: v2
+
+    Processor 1:                 Processor 2:
+    1.  Partial sum s1           1.  Partial sum s2
+    2.  Send s1 to P2            2.  Receive s1 from P1
+    3.  Receive s2 from P2       3.  Send s2 to P1
+    4.  s = s1 + s2              4.  s = s1 + s2
+
+Better, but what if more than two processors?
+</section>
+
+
+<section data-markdown>
+## MPI: the de facto standard
+
+-   Pro: *Portability*
+-   Con: least-common-denominator for mid 80s
+
+The “assembly language” (or C?) of parallelism...  
+but, alas, assembly language can be high performance.
+</section>
+
+
+<section data-markdown>
+## Distributed memory machines
+
+-   Each node has local memory
+    -   ... and no direct access to memory on other nodes
+-   Nodes communicate via network interface
+-   Example: our cluster!
+-   Other examples: IBM SP, Cray T3E
+</section>
+
+
+<section data-markdown>
+## The story so far
+
+-   *Serial* performance as groundwork
+    -  Complicated function of architecture and memory
+    -  Understand to design data and algorithms
+-   *Parallel* performance
+    -  Serial issues + communication/synch overheads
+    -  Limit: parallel work available (Amdahl)
+-   Also discussed serial architecture and some of the basics of
+    parallel machine models and programming models.
+-   Next: Parallelism and locality in simulations
+</section>
+

@@ -1,0 +1,149 @@
+---
+layout: slide
+title: CS 5220
+description: Distributed memory
+theme: simple
+audio: http://www.cs.cornell.edu/~bindel/audio/2015-10-08-model/
+transition: slide
+js: js/quiz.js
+---
+
+<section data-markdown>
+# CS 5220
+## Distributed memory
+### Modeling message costs
+## 06 Oct 2015
+</section>
+
+
+<section data-markdown>
+### Basic questions
+
+- How much does a message cost?
+  -   *Latency*: time to get between processors
+  -   *Bandwidth*: data transferred per unit time
+  -   How does *contention* affect communication?
+- This is a combined hardware-software question!
+- Goal: understand just enough to model roughly
+</section>
+
+
+<section data-markdown>
+### Conventional wisdom
+
+-   Roughly constant latency (?)
+    -   Wormhole routing (or cut-through) flattens latencies vs
+        store-forward at hardware level
+    -   Software stack dominates HW latency!
+    -   Latencies *not* same between networks (in box vs
+        across)
+    -   May also have store-forward at library level
+-   Avoid topology-specific optimization
+    -   Want code that runs on next year’s machine, too!
+    -   Bundle topology awareness in vendor MPI libraries?
+    -   Sometimes specify a *software* topology
+</section>
+
+
+<section data-markdown>
+### $\alpha$-$\beta$ model
+
+Crudest model: $t_{\mathrm{comm}} = \alpha + \beta M$
+
+-   $t_{\mathrm{comm}} = $ communication time
+-   $\alpha = $ latency
+-   $\beta = $ inverse bandwidth
+-   $M = $ message size
+
+Works pretty well for basic guidance!
+
+Typically $\alpha \gg \beta \gg t_{\mathrm{flop}}$. More money on
+network, lower $\alpha$.
+</section>
+
+
+<section data-markdown>
+### LogP model
+
+Like $\alpha$-$\beta$, but includes CPU time on send/recv:
+
+-   Latency: the usual
+-   Overhead: CPU time to send/recv
+-   Gap: min time between send/recv
+-   P: number of processors
+
+Assumes small messages (gap $\sim$ bw for fixed message size).
+</section>
+
+
+<section data-markdown>
+### Communication costs
+
+Some basic goals:
+
+-   Prefer larger to smaller messages (avoid latency)
+-   Avoid communication when possible
+    -   Great speedup for Monte Carlo and other embarrassingly parallel
+        codes!
+-   Overlap communication with computation
+    -   Models tell you how much computation is needed to mask
+        communication costs.
+</section>
+
+
+<section data-markdown>
+### Intel MPI on Totient
+
+-   Two 6-core chips per nodes, eight nodes
+-   Heterogeneous network:
+    -   Ring between cores
+    -   Bus between chips
+    -   Gigabit ethernet between nodes
+-   Test ping-pong
+    -   Between cores on same chip
+    -   Between chips on same node
+    -   Between nodes
+</section>
+
+
+<section>
+<h3>Approximate $\alpha$-$\beta$ parameters (on node)</h3>
+
+<img width="80%" src="/img/pingpong/on-node.svg"></img><br/>
+</section>
+
+
+<section>
+<h3>Approximate $\alpha$-$\beta$ parameters (cross-node)</h3>
+
+<img width="80%" src="/img/pingpong/off-node.svg"></img><br/>
+</section>
+
+
+<section>
+<h3>Network model</h3>
+
+<img width="40%" src="/img/pingpong/on-node.svg"></img>
+<img width="40%" src="/img/pingpong/off-node.svg"></img><br/>
+
+<ul>
+  <li>On-chip: $\alpha$-$\beta$ works well!</li>
+  <li>Off-chip: Not so much</li>
+  <li>But cross-node communication is clearly expensive!</li>
+</ul>
+</section>
+
+<section data-markdown>
+### Moral
+
+Not all links are created equal!
+
+-   Might handle with mixed paradigm
+    -   OpenMP on node, MPI across
+    -   Have to worry about thread-safety of MPI calls
+-   Can handle purely within MPI
+-   Can ignore the issue completely?
+
+For today, we’ll take the last approach.
+</section>
+

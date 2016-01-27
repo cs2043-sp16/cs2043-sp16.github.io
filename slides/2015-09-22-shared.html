@@ -1,0 +1,198 @@
+---
+layout: slide
+title: CS 5220
+description: Shared memory concepts
+theme: simple
+audio: http://www.cs.cornell.edu/~bindel/audio/2015-09-22-shared/
+transition: slide
+js: js/quiz.js
+---
+
+<section data-markdown>
+# CS 5220
+## Shared memory
+### Basic concepts
+## 22 Sep 2015
+</section>
+
+
+<section data-markdown>
+### Overview
+
+- [Basic concepts (these slides)](/slides/2015-09-22-shared.html)
+- [Monte Carlo example](/slides/2015-09-22-mc.html)
+- [Pthreads programming](/slides/2015-09-22-pthreads.html)
+- [OpenMP programming](/slides/2015-09-24-openmp.html)
+- [Memory models and hardware implications](/slides/2015-09-24-memory.html)
+</section>
+
+
+<section data-markdown>
+### Parallel programming model
+
+-   Control
+    -   How is parallelism created?
+    -   What ordering is there between operations?
+-   Data
+    -   What data is private or shared?
+    -   How is data logically shared or communicated?
+-   Synchronization
+    -   What operations are used to coordinate?
+    -   What operations are atomic?
+-   Cost: how do we reason about each of above?
+</section>
+
+
+<section data-markdown>
+### Shared memory programming model
+
+Program consists of *threads* of control.
+
+-   Can be created dynamically
+-   Each has private variables (e.g. local)
+-   Each has shared variables (e.g. heap)
+-   Communication through shared variables
+-   Coordinate by synchronizing on variables
+-   Examples: OpenMP, pthreads, Cilk, Java threads
+</section>
+
+
+<section>
+<h3>Thread birth and death</h3>
+
+<img width="80%" src="/img/shared/forkjoin.svg"></img><br/>
+
+<p>
+Thread is created by <b>forking</b>.<br/>
+When done, <b>join</b> original thread.
+<p>
+</section>
+
+
+
+<section data-markdown>
+### Mechanisms for thread birth/death
+
+-   Statically allocate threads at start
+-   Fork/join (pthreads)
+-   Fork detached threads (pthreads)
+-   Cobegin/coend (OpenMP?)
+    -   Like fork/join, but lexically scoped
+-   Futures
+    -   `v = future(somefun(x))`
+    -   Attempts to use <span>v</span> wait on evaluation  
+</section>
+
+
+<section data-markdown>
+### Mechanisms for synchronization
+
+-   Locks/mutexes (enforce mutual exclusion)
+-   Monitors (like locks with lexical scoping)
+-   Barriers
+-   Condition variables (notification)
+</section>
+
+
+<section>
+  <h3>Mutex</h3>
+  
+  <img width="80%" src="/img/shared/mutex.svg"></img><br/>
+
+  <p>
+    Allow only one process at a time in <b>critical section</b>
+    (red).<br/>
+    Synchronize via locks, aka mutexes (<b>mutual exclusion vars</b>).
+  </p>
+</section>
+
+
+<section>
+  <h3>Condition variables</h3>
+
+  <img width="80%" src="/img/shared/condvar.svg"></img><br/>
+
+  <p>
+    Thread waits until condition holds (e.g. work available).
+  </p>
+</section>
+
+
+<section>
+  <h3>Barriers</h3>
+
+  <img width="80%" src="/img/shared/barrier.svg"></img><br/>
+
+  <p>
+    Computation phases separated by barriers.<br/>
+    Everyone reaches the barrier, then proceeds.
+  </p>
+</section>
+
+
+<section data-markdown>
+### Synchronization pitfalls
+
+-   Incorrect synchronization $\implies$ *deadlock*
+    -   All threads waiting for what the others have
+    -   Doesn’t always happen! $\implies$ hard to debug
+-   Too little synchronization $\implies$ data races
+    -   Again, doesn’t always happen!
+-   Too much synchronization $\implies$ poor performance
+    -   ... but makes it easier to think through correctness
+</section>
+
+
+<section>
+<h3>Deadlock</h3>
+
+<pre><code data-trim>
+// Thread 0:
+lock(l1); lock(l2);
+do_something();
+unlock(l2); unlock(l1);
+</pre></code>
+
+<pre><code data-trim>
+// Thread 1:
+lock(l2); lock(l1);
+do_something();
+unlock(l1); unlock(l2);
+</pre></code>
+
+<p>Conditions:</p>
+
+<ol>
+<li>Mutual exclusion</li>
+<li>Hold and wait</li>
+<li>No preemption</li>
+<li>Circular wait</li>
+</ol>
+
+</section>
+
+
+<section data-markdown>
+### Race to the dot
+
+Consider `S += partial_sum` on 2 CPU:
+
+-   P1: Load `S`
+-   P1: Add `partial_sum`
+-   P2: Load `S`
+-   P1: Store new `S`
+-   P2: Add `partial_sum`
+-   P2: Store new `S`
+</section>
+
+
+<section data-markdown>
+### Shared memory
+
+- Multi-threaded programming looks easy
+- ... except for synchronization
+  - Too little kills correctness
+  - Too much kills performance
+  - Easy to get wrong either way
+- Next up: [a Monte Carlo example](/slides/2015-09-22-mc.html)
+</section>

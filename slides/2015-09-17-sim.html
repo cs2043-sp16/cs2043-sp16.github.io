@@ -1,0 +1,571 @@
+---
+layout: slide
+title: CS 5220
+description: Parallelism and locality in simulation
+theme: simple
+transition: slide
+js: js/quiz.js
+---
+
+<section data-markdown>
+# CS 5220
+## Parallelism and locality in simulation
+## 17 Sep 2015
+</section>
+
+
+<section>
+<h3>Basic styles of simulation</h3>
+
+<ul>
+<li>Discrete event systems (continuous or discrete time)</li>
+<li>Particle systems</li>
+<li>Lumped parameter models (ODEs)</li>
+<li>Distributed parameter models (PDEs / integral equations)</li>
+</ul>
+
+<p style="text-align:left;">
+Often more than one type of simulation appropriate.<br/>
+Sometimes more than one at a time!
+</p>
+</section>
+
+
+<section data-markdown>
+### Common ideas / issues
+
+-   Load balancing
+    -   Imbalance from lack of parallelism, poor distribution
+    -   Can be static or dynamic
+-   Locality
+    -   Want big blocks with low surface-to-volume ratio
+    -   Minimizes communication / computation ratio
+    -   Can generalize ideas to graph setting
+-   Tensions and tradeoffs
+    -   Irregular spatial decompositions for load balance at the cost of
+        complexity, maybe extra communication
+    -   Particle-mesh methods —  
+        moving particles + fixed meshes = communication
+</section>
+
+
+<section data-markdown>
+### Lumped parameter simulations
+
+Examples include:
+
+-   SPICE-level circuit simulation
+    -   nodal voltages vs. voltage distributions
+-   Structural simulation
+    -   beam end displacements vs. continuum field
+-   Chemical concentrations in stirred tank reactor
+    -   mean concentrations vs. spatially varying
+
+Typically involves ordinary differential equations (ODEs),
+or with constraints (differential-algebraic equations, or DAEs).
+
+Often (not always) *sparse*.
+</section>
+
+
+<section>
+<h3>Sparsity</h3>
+
+<img width="70%" src="/img/lumped/mat2graph.svg"></img><br/>
+
+<p>
+Consider system of ODEs $x' = f(x)$ (special case: $f(x) = Ax$)
+</p>
+<ul>
+  <li>Dependency graph has edge $(i,j)$ if $f_j$ depends on $x_i$</li>
+  <li>Sparsity means each $f_j$ depends on only a few $x_i$</li>
+  <li>Often arises from physical or logical locality</li>
+  <li>Corresponds to $A$ being a sparse matrix (mostly zeros)</li>
+</ul>
+</section>
+
+
+<section>
+  <h3>Sparsity and partitioning</h3>
+
+<img width="70%" src="/img/lumped/mat2graph2.svg"></img><br/>
+
+<p style="text-align:left;">
+Want to partition sparse graphs so that
+</p>
+<ul>
+  <li>Subgraphs are same size (load balance)
+  <li>Cut size is minimal (minimize communication)
+</ul>
+<p>
+  We’ll talk more about this later.
+</p>
+</section>
+
+
+<section data-markdown>
+### Types of analysis
+
+Consider $x' = f(x)$ (special case: $f(x) = Ax + b$).  
+
+-   Static analysis ($f(x_*) = 0$)
+    -   Boils down to $Ax = b$ (e.g. for Newton-like steps)
+    -   Can solve directly or iteratively
+    -   Sparsity matters a lot!
+-   Dynamic analysis (compute $x(t)$ for many values of $t$)
+    -   Involves time stepping (explicit or implicit)
+    -   Implicit methods involve linear/nonlinear solves
+    -   Need to understand stiffness and stability issues
+-   Modal analysis (compute eigenvalues of $A$ or $f'(x_*)$)
+</section>
+
+
+<section data-markdown>
+### Explicit time stepping
+
+-   Example: forward Euler
+-   Next step depends only on earlier steps
+-   Simple algorithms
+-   May have stability/stiffness issues
+</section>
+
+
+<section data-markdown>
+### Implicit time stepping
+
+-   Example: backward Euler
+-   Next step depends on itself and on earlier steps
+-   Algorithms involve solves — complication, communication!
+-   Larger time steps, each step costs more
+</section>
+
+
+<section data-markdown>
+### A common kernel
+
+In all these analyses, spend lots of time in sparse matvec:
+
+-   Iterative linear solvers: repeated sparse matvec
+-   Iterative eigensolvers: repeated sparse matvec
+-   Explicit time marching: matvecs at each step
+-   Implicit time marching: iterative solves (involving matvecs)
+
+We need to figure out how to make matvec fast!
+</section>
+
+
+<section data-markdown>
+### An aside on sparse matrix storage
+
+-   Sparse matrix $\implies$ mostly zero entries
+    -   Can also have “data sparseness” — representation with less than
+        $O(n^2)$ storage, even if most entries nonzero
+-   Could be implicit (e.g. directional differencing)
+-   Sometimes explicit representation is useful
+-   Easy to get lots of indirect indexing!
+-   Compressed sparse storage schemes help
+</section>
+
+
+<section>
+<h3>Example: Compressed sparse row storage</h3>
+
+<img width="80%" src="/img/lumped/csr.svg"></img><br/>
+
+<p>
+This can be even more compact:
+</p>
+<ul>
+<li>Could organize by blocks (block CSR)</li>
+<li>Could compress column index data (16-bit vs 64-bit)</li>
+<li>Various other optimizations — see OSKI</li>
+</ul>
+</section>
+
+
+<section>
+<h3>Distributed parameter problems</h3>
+
+<p style="text-align:left;">
+Mostly PDEs:
+</p>
+<table>
+  <tr>
+    <th>Type</th>
+    <th>Example</th>
+    <th>Time?</th>
+    <th>Space dependence?</th>
+  </tr>
+  <tr>
+    <td>Elliptic</td>
+    <td>electrostatics</td>
+    <td>steady</td>
+    <td>global</td>
+  </tr>
+  <tr>
+    <td>Hyperbolic</td>
+    <td>sound waves</td>
+    <td>yes</td>
+    <td>local</td>
+  </tr>
+  <tr>
+    <td>Parabolic</td>
+    <td>diffusion</td>
+    <td>yes</td>
+    <td>global</td>
+  </tr>
+</table>
+
+<p style="text-align:left;">
+  Different types involve different communication:
+</p>
+<ul>
+<li>Global dependence $\implies$ lots of communication</li>
+<li>Finite wave speed $\implies$ local dependence</li>
+</ul>
+</section>
+
+
+<section>
+<h3>Example: 1D heat equation</h3>
+
+<img width="70%" src="/img/heat/heat1.svg"></img>
+
+<p style="text-align:left;">
+Consider flow (e.g. of heat) in a uniform rod
+</p>
+<ul>
+<li>Heat ($Q$) $\propto$ temperature ($u$) $\times$ mass ($\rho h$)</li>
+<li>Heat flow $\propto$ temperature gradient (Fourier’s law)</li>
+</ul>
+</section>
+
+
+<section>
+<h3>Example: 1D heat equation</h3>
+
+<img width="70%" src="/img/heat/heat1.svg"></img>
+
+<p>
+$$\begin{aligned}
+     \frac{\partial Q}{\partial t} \propto
+     h \frac{\partial u}{\partial t} &\approx
+     C \left[ \left( \frac{u(x-h)-u(x)}{h} \right) +
+              \left( \frac{u(x)-u(x+h)}{h} \right) \right] \\
+    \frac{\partial u}{\partial t} &\approx
+    C \left[ \frac{u(x-h)-2u(x)+u(x+h)}{h^2} \right] \rightarrow
+    C \frac{\partial^2 u}{\partial x^2}
+\end{aligned}$$
+</p>
+</section>
+
+
+<section>
+<h3>Spatial discretization</h3>
+
+<p style="text-align:left;">
+Heat equation with $u(0) = u(1) = 0$
+$$\frac{\partial u}{\partial t} = C \frac{\partial^2 u}{\partial x^2}$$
+</p>
+
+<p style="text-align:left;">
+Spatial semi-discretization:
+$$\frac{\partial^2 u}{\partial x^2} \approx \frac{u(x-h)-2u(x)+u(x+h)}{h^2}$$
+</section>
+
+<section>
+<h3>Spatial discretization</h3>
+
+<p style="text-align:left;">
+Yields a system of ODEs
+$$
+\begin{align}
+  \frac{du}{dt} & = C h^{-2} (-T) u \\
+  &= -C h^{-2}
+  \begin{bmatrix}
+     2 & -1      &   &    &        & \\
+    -1 &  2      & -1 &    &        & \\
+       & \ddots  & \ddots & \ddots & \\
+       &         & -1      & 2     & -1 \\
+       &         &        &  -1     & 2
+  \end{bmatrix}
+  \begin{bmatrix} u_1 \\ u_2 \\ \vdots \\ u_{n-2} \\ u_{n-1} \end{bmatrix}
+\end{align}$$
+</p>
+</section>
+
+
+<section>
+<h3>Explicit time stepping</h3>
+
+<p style="text-align:left;">
+Approximate PDE by ODE system (“method of lines”):
+$$\frac{du}{dt} = C h^{-2} T u$$
+Now need a time-stepping scheme for the ODE:
+</p>
+<ul>
+  <li>Simplest scheme is Euler:
+    $$u(t+\delta) \approx u(t) + u'(t) \delta =
+    \left( I - C \frac{\delta}{h^2} T \right) u(t)$$
+  </li>
+  <li>Taking a time step $\equiv$ sparse matvec with
+    $\left( I - C \frac{\delta}{h^2} T \right)$</li>
+  <li>This may not end well...</li>
+</ul>
+</section>
+
+
+<section>
+<h3>Explicit time stepping data dependence</h3>
+
+<img width="70%" src="/img/heat/heat2.svg"></img><br/>
+
+<p>
+Nearest neighbor interactions per step $\implies$<br/>
+finite rate of numerical information propagation
+</p>
+</section>
+
+
+<section>
+<h3>Explicit time stepping in parallel</h3>
+
+<img width="70%" src="/img/heat/heat3.svg"></img><br/>
+
+<pre><code class="nohighlight" data-trim>
+for t = 1 to N
+  communicate boundary data ("ghost cell")
+  take time steps locally
+end
+</code></pre>
+</section>
+
+
+<section>
+<h3>Overlap communication + computation</h3>
+
+<img width="70%" src="/img/heat/heat3.svg"></img><br/>
+
+<pre><code class="nohighlight" data-trim>
+for t = 1 to N
+  start boundary data sendrecv
+  compute new interior values
+  finish sendrecv
+  compute new boundary values
+end
+</code></pre>
+</section>
+
+
+<section>
+<h3>Batching time steps</h3>
+
+<img width="70%" src="/img/heat/heat4.svg"></img><br/>
+
+<pre><code class="nohighlight" data-trim>
+for t = 1 to N by B
+  start boundary data sendrecv (B values)
+  compute new interior values
+  finish sendrecv (B values)
+  compute new boundary values
+end
+</code></pre>
+</section>
+
+
+<section>
+<h3>Explicit pain</h3>
+
+<img width="70%" src="/img/heat/boom.svg"></img><br/>
+
+<p>
+  Unstable for $\delta > O(h^2)$!
+</p>
+</section>
+
+<section data-markdown>
+### Implicit time stepping
+
+-   Backward Euler uses backward difference for $d/dt$
+    $$u(t+\delta) \approx u(t) + u'(t + \delta t) \delta$$
+-   Taking a time step $\equiv$ sparse matvec with
+    $\left( I + C \frac{\delta}{h^2} T \right)^{-1}$
+-   No time step restriction for stability (good!)
+-   But each step involves linear solve (not so good!)
+    -   Good if you like numerical linear algebra?
+
+</section>
+
+<section>
+<h3><b>Explicit</b> and implicit</h3>
+
+<ul>
+<li>Propagates information at finite rate</li>
+<li>Steps look like sparse matvec (in linear case)</li>
+<li>Stable step determined by fastest time scale</li>
+<li>Works fine for <em>hyperbolic</em> PDEs</li>
+</section>
+
+<section>
+<h3>Explicit and <b>implicit</b></h3>
+
+<ul>
+<li>No need to resolve fastest time scales</li>
+<li>Steps can be long... but expensive
+  <ul>
+  <li>Linear/nonlinear solves at each step</li>
+  <li>Often these solves involve sparse matvecs</li>
+  </ul>
+</li>
+<li>Critical for <em>parabolic</em> PDEs</li>
+</ul>
+</section>
+
+<section>
+<h3>Poisson problems</h3>
+
+<p style="text-align:left;">
+  Consider 2D Poisson
+  $$-\nabla^2 u = 
+    \frac{\partial^2 u}{\partial x^2} + 
+    \frac{\partial^2 u}{\partial y^2} = f
+  $$
+</p>
+<ul>
+  <li>Prototypical elliptic problem (steady state)</li>
+  <li>Similar to a backward Euler step on heat equation</li>
+</ul>
+</section>
+
+<section>
+<h3>Poisson problem discretization</h3>
+
+<img width="40%" src="/img/heat/stencil.svg"></img><br/>
+
+<p style="text-align:left;">
+$$
+  u_{i,j} = h^{-2} \left( 4u_{i,j}-u_{i-1,j}-u_{i+1,j}-u_{i,j-1}-u_{i,j+1} \right)
+$$
+</section>
+
+<section>
+<h3>Poisson problem discretization</h3>
+
+<p>
+$$L =
+  \left[
+  \begin{array}{ccc|ccc|ccc}
+     4 & -1 &    & -1 &    &    &    &    &    \\
+    -1 &  4 & -1 &    & -1 &    &    &    &    \\
+       & -1 &  4 &    &    & -1 &    &    &    \\ \hline
+    -1 &    &    &  4 & -1 &    & -1 &    &    \\
+       & -1 &    & -1 &  4 & -1 &    & -1 &    \\
+       &    & -1 &    & -1 &  4 &    &    & -1 \\ \hline
+       &    &    & -1 &    &    &  4 & -1 &    \\
+       &    &    &    & -1 &    & -1 &  4 & -1 \\
+       &    &    &    &    & -1 &    & -1 &  4 
+  \end{array}
+\right]$$
+</p>
+</section>
+
+<section>
+<h3>Poisson solvers in 2D</h3>
+
+<p style="text-align:left;">
+  Demmel, <em>Applied Numerical Linear Algebra</em>.
+</p>
+<table style="font-size:70%">
+  <tr>
+    <th>Method</th>
+    <th>Time</th>
+    <th>Space</th>
+  </tr>
+  <tr>
+    <td>Dense LU</td>
+    <td>$N^3$</td>
+    <td>$N^2$</td>
+  </tr>
+  <tr>
+    <td>Band LU</td>
+    <td>$N^2$</td>
+    <td>$N^{3/2}$</td>
+  </tr>
+  <tr>
+    <td>Jacobi</td>
+    <td>$N^2$</td>
+    <td>$N$</td>
+  </tr>
+  <tr>
+    <td>Explicit inv</td>
+    <td>$N^2$</td>
+    <td>$N^2$</td>
+  </tr>
+  <tr>
+    <td>CG</td>
+    <td>$N^{3/2}$</td>
+    <td>$N$</td>
+  </tr>
+  <tr>
+    <td>Red-black SOR</td>
+    <td>$N^{3/2}$</td>
+    <td>$N$</td>
+  </tr>
+  <tr>
+    <td>Sparse LU</td>
+    <td>$N^{3/2}$</td>
+    <td>$N \log N$</td>
+  </tr>
+  <tr>
+    <td>FFT</td>
+    <td>$N \log N$</td>
+    <td>$N$</td>
+  </tr>
+  <tr>
+    <td>Multigrid</td>
+    <td>$N$</td>
+    <td>$N$</td>
+  </tr>
+</table>
+
+<p>
+  Remember: best MFlop/s $\neq$ fastest solution!
+</p>
+</section>
+
+<section data-markdown>
+### General implicit picture
+
+-   Implicit solves or steady state $\implies$ solving systems
+-   Nonlinear solvers generally linearize
+-   Linear solvers can be
+    -   Direct (hard to scale)
+    -   Iterative (often problem-specific)
+-   Iterative solves boil down to matvec!
+</section>
+
+<section data-markdown>
+### PDE solver summary
+
+Can be implicit or explicit (as with ODEs)
+
+-   Explicit (sparse matvec) - fast, but short steps?
+     -   works fine for hyperbolic PDEs
+
+-   Implicit (sparse solve)
+     -   Direct solvers are hard!
+     -   Sparse solvers turn into matvec again
+</section>
+
+<section data-markdown>
+### PDE solver summary
+
+-   Differential operators turn into local mesh stencils
+    -   Matrix connectivity looks like mesh connectivity
+    -   Can partition into subdomains that communicate only through
+        boundary data
+    -   More on graph partitioning later
+-   Not all nearest neighbor ops are equally efficient!
+    -   Depends on mesh structure
+    -   Also depends on flops/point
+</section>

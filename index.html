@@ -1,0 +1,67 @@
+---
+title: Home
+layout: top
+---
+
+{% include cs2043_head.html %}
+
+<div class="row">
+
+  <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6">
+    <h2>Overview</h2>
+    <p>
+      CS 2043 is a seven week, two credit, S/U only course. It runs from
+      January 27th through March 18, 2016.
+    </p>
+    <p>
+      There are two important dates where the registrar is concerned:
+    </p>
+    <ul>
+      <li> Last day to add: February 3rd, 2016 </li>
+      <li> Last day to drop: February 10th, 2016 </li>
+    </ul>
+    <p>
+      The goal of this course is to provide you with a high-level exposure
+      to a wide range of Unix tools.  From the basics of getting your Unix
+      environment setup, to using your terminal, to building complex programs
+      in a Unix environment, this class aims to give you the base toolset
+      to continue developing in a Unix environment.  That is, you should not
+      expect to exit the course with a mastery of "everything there is to
+      know about Unix."  Instead, you should expect to exit the course with
+      an understanding of how to navigate and configure a Unix environment,
+      as well as have the confidence and tools to solve future problems (e.g.
+      ones you did not encounter in this course) on your own.
+    </p>
+    <p>
+      As with any course, regardless of the subject, you do not really learn
+      something until you sit down and try it out yourself.  The lecture and
+      assignments are designed with this in mind &mdash; you should expect to learn
+      the material by interacting with it directly.  The course material is
+      designed assuming you have no prior experience developing in a Unix
+      environment, but does assume that you have been exposed to solving
+      Computer Science problems at an introductory level (in any flavor /
+      language).  You are expected to put in an appropriate amount of effort to
+      complete the assignments.  Ultimately, what you put into the course is what
+      you will get out of it.
+    </p>
+    <div class="media">
+      <a class="pull-left" href="#">{% include github_education.html %}</a>
+      <div class="media-body">
+        We gratefully acknowledge GitHub Education for an enabling the use
+        of private repositories in support of this course.
+      </div>
+    </div>
+  </div>
+
+  <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6">
+    <h2><a href="posts.html">Posts</a></h2>
+    {% for post in site.posts limit:10 %}
+    <p class="hanging-indent">
+      <strong>{{ post.date | date_to_string }}</strong> &raquo;
+        <a href="{{ post.url }}">{{ post.title }}</a>
+        {{ post.excerpt }}
+    {% endfor %}
+    <a class="btn" href="posts.html">All posts &raquo;</a>
+  </div>
+
+</div>

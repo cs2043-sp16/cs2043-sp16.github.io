@@ -1,0 +1,13 @@
+title: CS 2043
+description: Course Page for CS 2043
+author: Stephen McDowell
+email: sjm324@cornell.edu
+baseurl: "/"
+url: "http://cs2043-sp16.github.io/"
+
+encoding: utf-8
+timezone: America/New_York
+
+exclude: ["Rakefile"]
+
+markdown: kramdown

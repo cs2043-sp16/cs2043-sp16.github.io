@@ -1,0 +1,231 @@
+---
+layout: slide
+title: CS 5220
+description: Pthreads programming
+theme: simple
+audio: http://www.cs.cornell.edu/~bindel/audio/2015-09-22-pthreads/
+transition: slide
+js: js/quiz.js
+---
+
+<section data-markdown>
+# CS 5220
+## Shared memory
+### Pthreads
+## 22 Sep 2015
+</section>
+
+
+<section data-markdown>
+### Shared memory programming model
+
+Program consists of *threads* of control.
+
+-   Can be created dynamically
+-   Each has private variables (e.g. local)
+-   Each has shared variables (e.g. heap)
+-   Communication through shared variables
+-   Coordinate by synchronizing on variables
+-   Examples: OpenMP, *pthreads*, Cilk, Java threads
+</section>
+
+
+<section data-markdown>
+### Concrete code: pthreads
+
+-   pthreads = POSIX threads
+-   Standardized across UNIX family
+-   Fairly low-level
+-   Heavy weight?
+</section>
+
+
+<section>
+<h3>Thread birth and death</h3>
+
+<img width="80%" src="/img/shared/forkjoin.svg"></img><br/>
+
+<p>
+Thread is created by <b>forking</b>.<br/>
+When done, <b>join</b> original thread.
+<p>
+</section>
+
+
+<section data-markdown>
+### Thread birth and death
+
+    void thread_fun(void* arg);
+
+    pthread_t thread_id;
+    pthread_create(&thread_id, &thread_attr, 
+                   thread_fun, &fun_arg);
+    // ...
+    pthread_join(&thread_id, NULL);
+
+</section>
+
+
+<section>
+  <h3>Mutex</h3>
+  
+  <img width="80%" src="/img/shared/mutex.svg"></img><br/>
+
+  <p>
+    Allow only one process at a time in <b>critical section</b>
+    (red).<br/>
+    Synchronize via locks, aka mutexes (<b>mutual exclusion vars</b>).
+  </p>
+</section>
+
+
+<section data-markdown>
+### Mutex
+
+    pthread_mutex_t l;
+    pthread_mutex_init(&l, NULL);
+    // ...
+    pthread_mutex_lock(&l);
+    /* Critical section here */
+    pthread_mutex_unlock(&l);
+    // ...
+    pthread_mutex_destroy(&l);
+  
+</section>
+
+<section>
+  <h3>Condition variables</h3>
+
+  <img width="80%" src="/img/shared/condvar.svg"></img><br/>
+
+  <p>
+    Thread waits until condition holds (e.g. work available).
+  </p>
+</section>
+
+
+<section>
+<h3>Condition variables</h3>
+
+<pre><code data-trim>
+pthread_mutex_t l;
+pthread_cond_t cv;
+pthread_mutex_init(&l)
+pthread_cond_init(&cv, NULL);
+</code></pre>
+
+<pre style="width:80%;"><code data-trim>
+/* Thread 0 */
+mutex_lock(&l);
+add_work();
+cond_signal(&cv);
+mutex_unlock(&l);
+</code></pre>
+<pre style="width:80%;"><code data-trim>
+/* Thread 1 */
+mutex_lock(&l);
+if (!work_ready)
+    cond_wait(&cv, &l);
+get_work();
+mutex_unlock();
+</code></pre>
+
+<pre><code data-trim>
+pthread_cond_destroy(&cv);
+pthread_mutex_destroy(&l);
+</code></pre>
+
+</section>
+
+
+<section>
+  <h3>Barriers</h3>
+
+  <img width="80%" src="/img/shared/barrier.svg"></img><br/>
+
+  <p>
+    Computation phases separated by barriers.<br/>
+    Everyone reaches the barrier, then proceeds.
+  </p>
+</section>
+
+
+<section data-markdown>
+### Barriers
+
+    pthread_barrier_t b;
+    pthread_barrier_init(&b, NULL, nthreads);
+    // ...
+    pthread_barrier_wait(&b);
+    // ...
+
+</section>
+
+
+<section data-markdown>
+### Example: Work queues
+
+-   Job composed of different tasks
+-   Work gang of threads to execute tasks
+-   Maybe tasks can be added over time?
+-   Want dynamic load balance  
+</section>
+
+
+<section data-markdown>
+### Example: Work queues
+
+Basic data:
+
+-   Gang of threads
+-   Work queue data structure
+-   Mutex protecting data structure
+-   Condition to signal work available
+-   Flag to indicate all done?  
+</section>
+
+
+<section data-markdown>
+### Example: Work queues
+
+    task_t get_task() {
+      task_t result;
+      pthread_mutex_lock(&task_l);
+      if (done_flag) {
+        pthread_mutex_unlock(&task_l);
+        pthread_exit(NULL);
+      }
+      if (num_tasks == 0)
+        pthread_cond_wait(&task_ready, &task_l);
+      // ... Remove task from data struct ...
+      pthread_mutex_unlock(&task_l);
+      return result;
+    }
+</section>
+
+
+<section data-markdown>
+### Example: Work queues
+
+    void add_task(task_t task) {
+      pthread_mutex_lock(&task_l);
+      ... Add task to data struct ...
+      if (num_tasks++ == 0)
+        pthread_cond_signal(&task_ready);
+      pthread_mutex_unlock(&task_l);
+    }
+</section>
+
+
+<section data-markdown>
+### The problem with pthreads
+
+Portable standard, but...
+
+-   Low-level library standard
+-   Verbose
+-   Makes it easy to goof on synchronization
+-   Compiler doesn’t help out much
+
+OpenMP is a common alternative.
+</section>

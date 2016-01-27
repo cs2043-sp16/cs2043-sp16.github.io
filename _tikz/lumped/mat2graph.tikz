@@ -1,0 +1,35 @@
+\begin{tikzpicture}
+
+  % A = spy plot
+  \draw (0,0.75) node[anchor=east] {$A=$};
+  \begin{scope}[xshift=6pt,scale=2]
+    \draw[ultra thick,rounded corners] (-2.40pt,21.60pt)
+                rectangle (21.60pt,-2.40pt);
+    \draw[fill=blue] (0.00pt,19.20pt) circle [radius=1.4pt]; 
+    \draw[fill=blue] (4.80pt,19.20pt) circle [radius=1.4pt]; 
+    \draw[fill=blue] (0.00pt,14.40pt) circle [radius=1.4pt]; 
+    \draw[fill=blue] (4.80pt,14.40pt) circle [radius=1.4pt]; 
+    \draw[fill=blue] (9.60pt,14.40pt) circle [radius=1.4pt]; 
+    \draw[fill=blue] (4.80pt,9.60pt) circle [radius=1.4pt]; 
+    \draw[fill=blue] (9.60pt,9.60pt) circle [radius=1.4pt]; 
+    \draw[fill=blue] (14.40pt,9.60pt) circle [radius=1.4pt]; 
+    \draw[fill=blue] (9.60pt,4.80pt) circle [radius=1.4pt]; 
+    \draw[fill=blue] (14.40pt,4.80pt) circle [radius=1.4pt]; 
+    \draw[fill=blue] (19.20pt,4.80pt) circle [radius=1.4pt]; 
+    \draw[fill=blue] (14.40pt,0.00pt) circle [radius=1.4pt]; 
+    \draw[fill=blue] (19.20pt,0.00pt) circle [radius=1.4pt]; 
+  \end{scope}
+
+  % Graph picture
+  \begin{scope}[xshift=4cm]
+  \node (A) at (0,0.75) {1};
+  \node (B) at (1,0.75) {2};
+  \node (C) at (2,0.75) {3};
+  \node (D) at (3,0.75) {4};
+  \node (E) at (4,0.75) {5};
+  \draw (A) -- (B) -- (C) -- (D) -- (E);
+  \end{scope}
+
+  \node[anchor=north] at (0.8,-0.5) {Matrix};
+  \node[anchor=north] at (6,-0.5) {Graph};
+\end{tikzpicture}

@@ -1,0 +1,321 @@
+---
+layout: slide
+title: CS 5220 architecture intro
+description: Instruction-level parallelism
+theme: black
+audio: http://www.cs.cornell.edu/~bindel/audio/2015-09-01-parallel/
+transition: slide
+js: js/quiz.js
+---
+
+
+<section data-markdown>
+# CS 5220: Applications of Parallel Computers
+## Instruction-level parallelism
+## 01 Sep 2015
+</section>
+
+
+<section data-markdown>
+## Example 1: Laundry
+
+- Three stages to laundry: wash, dry, fold
+- Three loads: darks, lights, underwear
+- How long will this take?
+</section>
+
+
+<section>
+  <h2>How long will it take?</h2>
+  <div class="quizzer">
+    Three loads of laundry to wash, dry, fold.
+    One hour per stage.  What is the total time?
+    A: 9 hours
+    =: You spend too much time on laundry
+    A: 5 hours
+    =: That's what I had in mind!
+    A: 3 hours
+    =: Maybe at a laundromat; what if only one washer/drier?
+  </div>
+</section>
+
+
+<section data-markdown>
+## Setup
+
+- Three *functional units*
+  - Washer
+  - Drier
+  - Folding table
+- Different cases
+  - One load at a time
+  - Three loads with one washer/drier
+  - Three loads with friends at the laundromat
+</section>
+
+
+<section>
+  <h2>Serial execution (9 hours)</h2>
+
+  <table>
+    <tr>
+      <td>Wash</td>
+      <td>Dry</td>
+      <td>Fold</td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+    </tr>
+    <tr>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td>Wash</td>
+      <td>Dry</td>
+      <td>Fold</td>
+      <td></td>
+      <td></td>
+      <td></td>
+    </tr>
+    <tr>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td>Wash</td>
+      <td>Dry</td>
+      <td>Fold</td>
+    </tr>
+  </table>
+</section>
+
+
+<section>
+  <h2>Pipelined execution (5 hours)</h2>
+
+  <table>
+    <tr>
+      <td>Wash</td>
+      <td>Dry</td>
+      <td>Fold</td>
+      <td></td>
+      <td></td>
+    </tr>
+    <tr>
+      <td></td>
+      <td>Wash</td>
+      <td>Dry</td>
+      <td>Fold</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td></td>
+      <td></td>
+      <td>Wash</td>
+      <td>Dry</td>
+      <td>Fold</td>
+    </tr>
+  </table>
+</section>
+
+
+<section>
+  <h2>Parallel units (3 hours)</h2>
+
+  <table>
+    <tr>
+      <td>Wash</td>
+      <td>Dry</td>
+      <td>Fold</td>
+    </tr>
+    <tr>
+      <td>Wash</td>
+      <td>Dry</td>
+      <td>Fold</td>
+    </tr>
+    <tr>
+      <td>Wash</td>
+      <td>Dry</td>
+      <td>Fold</td>
+    </tr>
+  </table>
+</section>
+
+
+<section data-markdown>
+## Example 2: Arithmetic
+
+$$2 \times 2 + 3 \times 3$$
+
+> A child of five would understand this.  Send someone to fetch a child
+> of five.  
+> -- [Groucho Marx](http://www.goodreads.com/quotes/98966-a-child-of-five-could-understand-this-send-someone-to)
+</section>
+
+
+<section>
+<h2>How long will it take?</h2>
+
+<div class="quizzer">
+  Suppose all children can do one add or multiply per second.
+  How long would it take to compute $2 \times 2 + 3 \times 3$?
+  A: 3 seconds
+  =: OK, three ops at one op/s; what if there are multiple kids?
+  A: 2 seconds
+  =: OK, if two kids do the multiplies in parallel
+  A: 1 second
+  =: Not without finding faster kids!
+</div>
+
+</section>
+
+
+<section>
+<h2>One child</h2>
+
+<table>
+  <tr>
+    <td>$2 \times 2 = 4$</td>
+    <td>$3 \times 3 = 9$</td>
+    <td>$4 + 9 = 13$</td>
+  </tr>
+</table>
+
+<p>Total time is 3 seconds</p>
+</section>
+
+
+<section>
+<h2>Two children</h2>
+
+<table>
+  <tr>
+    <td>$2 \times 2 = 4$</td>
+    <td>$4 + 9 = 13$</td>
+  </tr>
+  <tr>
+    <td>$3 \times 3 = 9$</td>
+    <td></td>
+  </tr>
+</table>
+
+<p>Total time is 2 seconds</p>
+</section>
+
+
+<section>
+<h2>Many children</h2>
+
+<table>
+  <tr>
+    <td>$2 \times 2 = 4$</td>
+    <td>$4 + 9 = 13$</td>
+  </tr>
+  <tr>
+    <td>$3 \times 3 = 9$</td>
+    <td></td>
+  </tr>
+</table>
+
+<p>
+  Total time remains 2 seconds = sum of latencies for
+  two stages with a data dependency between them.
+</p>
+</section>
+
+
+<section data-markdown>
+## Pipelining
+
+- Improves *bandwidth*, but not *latency*
+- Potential speedup = number of stages
+  - What if there's a branch?
+- Different pipelines for different functional units
+  - Front-end has a pipeline
+  - Functional units (FP adder, multiplier) pipelined
+  - Divider often not pipelined
+</section>
+
+
+<section data-markdown>
+## SIMD
+
+- Single Instruction Multiple Data
+- Old idea with resurgence in 90s (for graphics)
+- Now short vectors are ubiquitous
+  - 256 bit wide AVX on CPU
+  - 512 bit wide on Xeon Phi!
+- Alignment matters
+</section>
+
+
+<section data-markdown>
+## Example: [My laptop](http://www.everymac.com/systems/apple/macbook_pro/specs/macbook-pro-core-i5-2.6-13-late-2013-retina-display-specs.html)
+
+MacBook Pro (Retina, 13 in, Late 2013)
+
+- [Intel Core i5-4228U (Haswell arch)](http://ark.intel.com/products/75991/Intel-Core-i5-4288U-Processor-3M-Cache-up-to-3_10-GHz)
+- Two cores / four HW threads
+- Variable clock: 2.6 GHz / 3.1 GHz TurboBoost
+- Four wide front end (fetch+decode 4 ops/cycle/core)
+- Operations internally broken down into "micro-ops"
+  - Cache micro-ops -- like hardware JIT?!
+</section>
+
+
+<section data-markdown>
+## My laptop: floating point
+
+- Two fully-pipelined multiply or FMA per cycle
+  - FMA = Fused Multiply Add: one op, one rounding error
+- [256 bit SIMD (AVX)](https://en.wikipedia.org/wiki/Advanced_Vector_Extensions)
+- [Two fully pipelined FP units](http://www.realworldtech.com/haswell-cpu/4/)
+  - Two multiply or Fused Multiply-Add (FMA) per cycle
+  - Only one regular add per cycle
+</section>
+
+
+<section data-markdown>
+## Peak flop rate
+  
+- Result (double precision) $\approx 100$ GFlop/s
+  - 2 flops/FMA
+  - $\times 4$ FMA/vector FMA = 8 flops/vector FMA
+  - $\times 2$ vector FMAs/cycle = 16 flops/cycle
+  - $\times 2$ cores = 32 flops/cycle
+  - $\times 3.1 \times 10^9$ cycles/s $\approx 100$ GFlop/s
+- Single precision $\approx 200$ GFlop/s
+
+</section>
+
+
+<section data-markdown>
+## Reaching peak flop
+
+- Need lots of *independent* vector work
+  - FMA latency = 5 cycles on Haswell
+  - Need $8 \times 5 = 40$ *independent* FMA to reach peak
+  - Great for matrix multiply -- hard in general
+- Still haven't [talked about memory!](/slides/2015-09-01-memory.html)
+</section>
+
+
+<section data-markdown>
+## Punchline
+
+- Special features: SIMD, FMA
+- Compiler understands how to use these *in principle*
+  - Rearranges instructions to get good mix
+  - Tries to use FMAs, vector instructions
+- *In practice*, the compiler needs your help
+  - Set optimization flags, pragmas, etc
+  - Rearrange code to make obvious and predictable
+  - Use special intrinsics or library routines
+  - Choose data layouts + algorithms to suit machine
+- Goal: You handle high-level, compiler handles low-level
+</section>

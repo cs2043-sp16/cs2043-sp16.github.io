@@ -126,7 +126,30 @@ you need to do is have VirtualBox extract it.
 5. Check the box that says "Reinitialize the MAC address of all network cards."
 6. Click import, and let VirtualBox take over.
 
-#### Step 4: Customize the Virtual Machine
+##### No 64bit options?
+
+If you are having this issue, then you need to enable something in the BIOS called "VT-x".  This exists
+to provide "security", and is usually disabled by default.  Matthew Lombana was nice enough to solve this
+on Piazza, and linked [this article](http://www.fixedbyvonnie.com/2014/11/virtualbox-showing-32-bit-guest-versions-64-bit-host-os/#.Vqj7KCorKNg)
+for the solution.
+
+You can also search for "enable VT-x (insert computer model)" to find a solution.  For example, if you
+had a Dell Inspiron, you would search for "enable VT-x Dell Inspiron **(model number)**".  Use the model
+number to get better results.
+
+If your computer does not support VT-x, e-mail me immediately with your computer make and model.  I may
+produce 32bit VMs if people are having trouble, but would prefer not to.
+
+Lastly, be **very** careful in the BIOS.  Do not change anything you do not need to, as this can produce
+adverse problems and may make it so that you cannot start your operating system (depending on what you
+did).
+
+#### Step 4: Run it!
+
+For both VMs, the username is `student` and the password is `student`.  You are encouraged to change
+your password to something else.
+
+#### Step 5: Customize the Virtual Machine
 
 The VMs I made have very small demands to allow everybody to use them.  Specifically, they use 1 core and only need 2048MB of RAM.  Many of you will have plenty more available, I will cover in lecture how to configure this a little more.
 

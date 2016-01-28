@@ -153,7 +153,19 @@ your password to something else.
 
 The VMs I made have very small demands to allow everybody to use them.  Specifically, they use 1 core and only need 2048MB of RAM.  Many of you will have plenty more available, I will cover in lecture how to configure this a little more.
 
-<em>Video tutorial coming shortly</em>.
+##### Part 1: Configure VirtualBox (Both VMs)
+
+<iframe width="420" height="315" src="https://www.youtube.com/embed/L1XwJ2jgfe4" frameborder="0" allowfullscreen></iframe>
+
+##### Part 2: Install the Guest Additions for Fullscreen
+
+**Ubuntu**
+
+<iframe width="420" height="315" src="https://www.youtube.com/embed/_1VeR8qB1Xw" frameborder="0" allowfullscreen></iframe>
+
+**Fedora**
+
+<iframe width="420" height="315" src="https://www.youtube.com/embed/iypGPZ9LHzQ" frameborder="0" allowfullscreen></iframe>
 
 ### Options
 

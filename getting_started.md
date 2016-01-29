@@ -167,6 +167,45 @@ The VMs I made have very small demands to allow everybody to use them.  Specific
 
 <iframe width="420" height="315" src="https://www.youtube.com/embed/iypGPZ9LHzQ" frameborder="0" allowfullscreen></iframe>
 
+#### Help!  I can't get a 64bit VM working
+
+A couple of students have contacted me because they are having trouble getting the 64bit VMs working.
+Either because the BIOS is too confusing, your hardware isn't cutting it, or possibly a couple of other
+reasons.
+
+##### Download the Virtual Hard Drive
+
+The description of the video in the next section has the same details, but for convenience I will
+paste them here.  The video shows the download page, do be sure that you download the 32bit VirtualBox
+Virtual Hard Drive.  Technically the VMWare one would work too, but I haven't tested it.
+
+> The folks at OS Boxes have an image available for you here:
+> 
+> http://www.osboxes.org/ubuntu/#ubuntu-15_10-vbox
+> 
+> They used 7zip to compress it, so you will need to install something to extract the image.
+> 
+> Windows: just go to http://www.7-zip.org/ and download their installer.
+> 
+> Mac: there are quite a few, I suggest using Keka: http://www.kekaosx.com/en/
+> 
+> Now that you can uncompress 7z files, you should just be able to double-click it or possibly right-click
+> and say "extract with Keka", and in Windows I believe there is a new 7zip menu when you right click on things.
+
+##### Setup the Virtual Machine in VirtualBox
+
+Follow the video.
+
+<iframe width="420" height="315" src="https://www.youtube.com/embed/Klir-TtxP3k" frameborder="0" allowfullscreen></iframe>
+
+##### Customize the VM!
+
+Refer back to step 5 to enable various items such as being able to plug in a USB stick or have
+real fullscreen enabled.
+
+If I have time, I will create another page explaining the various things I installed / tweaked in
+the course VM.
+
 ### Options
 
 In this day and age there are a **lot** of [different Linux distributions][distros].  Many of

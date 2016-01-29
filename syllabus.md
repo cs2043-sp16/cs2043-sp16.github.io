@@ -13,7 +13,7 @@ Location location: Hollister Hall B14
 
 ##### Lecturer: Stephen McDowell
 
-- Friday: 4pm - 5pm, Gates G13
+- **TBD**
 
 #### Notice
 Do not, under any circumstances, e-mail any of the TAs directly.  All questions /
@@ -28,7 +28,7 @@ Piazza.  If there is something urgent going on, you should e-mail me directly.
 ##### TA: Jerome Francis
 
 - Monday: 2:30pm - 3:30pm, Gates G13
-- Friday: 2pm - 4pm, Gates G13
+- Friday: 2pm - 5pm, Gates G13
 
 ##### TA: Joseph Marino
 

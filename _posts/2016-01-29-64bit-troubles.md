@@ -2,7 +2,7 @@
 layout: post
 title:  "Having Trouble with the Course VM"
 author: Stephen McDowell
-date:   2016-01-28 00:01:00
+date:   2016-01-29 00:01:00
 tags:   intel
 ---
 

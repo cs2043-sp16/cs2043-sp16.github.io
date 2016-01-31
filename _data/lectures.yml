@@ -3,16 +3,17 @@
 #
 -
   date: 2016-01-27
-  info: 01 - Introduction
+  info: <a href="slides/lecture01/lecture01.pdf" target="_blank">01 - Introduction</a>
   week: 1
   hw:
     - HW0 out
   demo:
     - Virtual Machine creation / usage
-    - Creating a git repository
 -
   date: 2016-01-29
-  info: '02 - The Unix file system'
+  info: <a href="slides/lecture02/lecture02.pdf" target="_blank">02 - The Unix file system</a>
+  demo:
+    - Creating a git repository
 #
 # ==================
 # Week 2

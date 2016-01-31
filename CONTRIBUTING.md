@@ -18,4 +18,4 @@ are expected to uphold this code.
 [authors]: AUTHORS.txt
 [mit]: http://opensource.org/licenses/MIT
 [cc]: http://creativecommons.org/licenses/by-sa/4.0/
-[code]: http://cornell-cs5220-f15.github.io/contribute.html
+[code]: http://cs2043-sp16.github.io/conduct.html

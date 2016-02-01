@@ -20,10 +20,12 @@
 #
 -
   date: 2016-02-01
-  info: '03 - Making bash work for you'
+  info: <a href="slides/lecture03/lecture03.pdf" target="_blank">03 - Manipulating Files and Using Git</a>
   hw:
     - HW0 due
   week: 2
+  misc:
+    - Our first lecture demo!
 -
   date: 2016-02-03
   info: '04 - More Unix tools'

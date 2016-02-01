@@ -5,15 +5,15 @@ layout:     main
 
 ### Lecture and section information
 
-CS 2043, Spring 2016  
-Lecture time: MWF 11:15am - 12:05pm  
-Location location: Hollister Hall B14  
+CS 2043, Spring 2016
+Lecture time: MWF 11:15am - 12:05pm
+Location location: Hollister Hall B14
 
 ### Staff and office hours
 
 ##### Lecturer: Stephen McDowell
 
-- **TBD**
+- Tuesday: 6:00pm - 7:00pm, Gates G19
 
 #### Notice
 Do not, under any circumstances, e-mail any of the TAs directly.  All questions /
@@ -53,7 +53,7 @@ biology and computational linguistics, in which data is naturally represented
 by strings.  This course takes students from shell basics and piping, to
 regular-expression processing tools, to shell scripting and Python.  Other
 topics to be covered include handling concurrent and remote resources,
-manipulating streams and files, and managing software installations. 
+manipulating streams and files, and managing software installations.
 
 ### Prerequisites
 
@@ -145,7 +145,7 @@ As stated previously, assignments will be due by 5pm on Friday.  This is a hard
 deadline.  However, life happens.  If you happen to need extra time, this is how it
 will work:
 
-<!-- 
+<!--
   It really shouldn't have been necessary to do this...but markdown tables dont have rules
   as far as I can tell...
 -->
@@ -161,7 +161,7 @@ $$
 $$
 
 In words, you lose 1 point per 24hr period it is late with a quasi-grace period on
-Friday evening.  No submissions will be accepted after 5pm on Monday.  
+Friday evening.  No submissions will be accepted after 5pm on Monday.
 
 ### Collaboration
 
@@ -187,7 +187,7 @@ from your coursework or other factors, but that is no reason for dishonesty!  If
 can't complete the work on the own, come talk to the professor, the TA, or your advisor, and
 we can help you figure out what to do.
 
-For more information, see Cornell's 
+For more information, see Cornell's
 [Code of Academic Integrity](http://cuinfo.cornell.edu/aic.cfm).
 
 ### Code of conduct

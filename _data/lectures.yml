@@ -28,9 +28,10 @@
     - Our first lecture demo!
 -
   date: 2016-02-03
-  info: '04 - More Unix tools'
+  info: <a href="slides/lecture04/lecture04.pdf" target="_blank">04 - More Files, Chaining Commands, and your First(?) Git Repository</a>
   misc:
     - Last day to add.
+    - Forking a repository demo
 -
   date: 2016-02-05
   info: '05 - Processes and jobs'

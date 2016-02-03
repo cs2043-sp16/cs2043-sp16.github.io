@@ -29,9 +29,10 @@
 -
   date: 2016-02-03
   info: <a href="slides/lecture04/lecture04.pdf" target="_blank">04 - More Files, Chaining Commands, and your First(?) Git Repository</a>
+  demo:
+    - Forking a repository demo
   misc:
     - Last day to add.
-    - Forking a repository demo
 -
   date: 2016-02-05
   info: '05 - Processes and jobs'

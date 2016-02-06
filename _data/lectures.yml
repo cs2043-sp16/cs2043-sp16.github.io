@@ -35,7 +35,11 @@
     - Last day to add.
 -
   date: 2016-02-05
-  info: '05 - Processes and jobs'
+  info: <a href="_slides/lecture05/lecture05.pdf">05 - Expansions and Regular Expressions</a>
+  hw:
+    - HW1 out
+  misc:
+    - Contains two of the most useful commands you will ever use.
 #
 # ==================
 # Week 3
@@ -52,6 +56,8 @@
 -
   date: 2016-02-12
   info: '08 - Vim, Tmux and screens'
+  hw:
+    - HW1 due.
 #
 # ==================
 # Week 4

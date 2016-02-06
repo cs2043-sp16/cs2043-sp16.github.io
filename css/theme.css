@@ -18,10 +18,14 @@ body {
 }
 
 p {
-    text-align: justify;
+  text-align: justify;
+}
+
+td {
+  text-align: left;
 }
 
 p.hanging-indent {
-    text-indent: -2em;
-    margin-left: 2em;
+  text-indent: -2em;
+  margin-left: 2em;
 }

@@ -13,7 +13,7 @@ out the google form linked in the GitHub section.
 Of course, you will need to have your Unix environment setup and you should do this as soon
 as possible.
 
-## HW1: Harry Potter and the Chamber of d---------
+## HW1: Harry Potter and the Chamber of <pre>d---------</pre>
 **Due: 2016-02-12**
 
 Please follow the instructions in your **a1** folder in your personal git repository.  You can

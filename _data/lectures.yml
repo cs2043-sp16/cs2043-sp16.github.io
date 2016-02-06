@@ -38,6 +38,8 @@
   info: <a href="_slides/lecture05/lecture05.pdf">05 - Expansions and Regular Expressions</a>
   hw:
     - HW1 out
+  demo:
+    - Basic text processing.
   misc:
     - Contains two of the most useful commands you will ever use.
 #

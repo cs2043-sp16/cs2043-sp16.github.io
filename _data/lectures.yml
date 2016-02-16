@@ -35,7 +35,7 @@
     - Last day to add.
 -
   date: 2016-02-05
-  info: <a href="_slides/lecture05/lecture05.pdf">05 - Expansions and Regular Expressions</a>
+  info: <a href="slides/lecture05/lecture05.pdf">05 - Expansions and Regular Expressions</a>
   hw:
     - HW1 out
   demo:
@@ -48,20 +48,20 @@
 #
 -
   date: 2016-02-08
-  info: <a href="_slides/lecture06/lecture06.pdf">06 - Intro to &#123;Scripting, Customizing, Text Editors&#125;</a>
+  info: <a href="slides/lecture06/lecture06.pdf">06 - Intro to &#123;Scripting, Customizing, Text Editors&#125;</a>
   week: 3
   demo:
     - Customize your terminal and VIM.
 -
   date: 2016-02-10
-  info: <a href="_slides/lecture07/lecture07.pdf">07 - Processes and Jobs</a>
+  info: <a href="slides/lecture07/lecture07.pdf">07 - Processes and Jobs</a>
   misc:
     - Last day to drop.
   demo:
     - Mastering vlc in the terminal.
 -
   date: 2016-02-12
-  info: <a href="_slides/lecture08/lecture08.pdf">08 - Superlative Streams</a>
+  info: <a href="slides/lecture08/lecture08.pdf">08 - Superlative Streams</a>
   hw:
     - HW1 due.
   demo:

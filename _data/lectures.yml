@@ -48,18 +48,24 @@
 #
 -
   date: 2016-02-08
-  info: '06 - Regular expressions'
+  info: <a href="_slides/lecture06/lecture06.pdf">06 - Intro to {Scripting,Customizing,Text Editors}</a>
   week: 3
+  demo:
+    - Customize your terminal and VIM.
 -
   date: 2016-02-10
-  info: '07 - Working with streams'
+  info: <a href="_slides/lecture07/lecture07.pdf">07 - Processes and Jobs</a>
   misc:
     - Last day to drop.
+  demo:
+    - Mastering vlc in the terminal.
 -
   date: 2016-02-12
-  info: '08 - Vim, Tmux and screens'
+  info: <a href="_slides/lecture08/lecture08.pdf">08 - Superlative Streams</a>
   hw:
     - HW1 due.
+  demo:
+    - Sed and html generation.
 #
 # ==================
 # Week 4

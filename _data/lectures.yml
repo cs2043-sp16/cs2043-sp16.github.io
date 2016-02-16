@@ -48,7 +48,7 @@
 #
 -
   date: 2016-02-08
-  info: <a href="_slides/lecture06/lecture06.pdf">06 - Intro to {Scripting,Customizing,Text Editors}</a>
+  info: <a href="_slides/lecture06/lecture06.pdf">06 - Intro to &#123;Scripting,Customizing,Text Editors&#124;</a>
   week: 3
   demo:
     - Customize your terminal and VIM.

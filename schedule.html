@@ -14,15 +14,13 @@ layout: main
   <table class="table table-striped">
     <colgroup>
       <col class="col-xs-1">      
-      <col class="col-xs-1">
       <col class="col-xs-2">      
-      <col class="col-xs-4">
+      <col class="col-xs-5">
       <col class="col-xs-4">
     </colgroup>
     <thead>
       <tr>
         <th>Week</th>
-        <th>Day</th>
         <th>Date</th>        
         <th>Description</th>
         <th>Notes</th>
@@ -30,11 +28,9 @@ layout: main
     </thead>
     {% for lec in site.data.lectures %}
     <tr{% if lec.break %} class="info"{% endif %}>
-      {% assign day = lec.date | date: "%a" %}
       {% assign week = lec.week | week: "%d" %}
       <th>{% if week %}{{ week }}{% endif %}</th>
-      <td>{{ day }},</td>
-      <td>{{ lec.date | date: "%b %d" }}</td>      
+      <td>{{ lec.date | date: "%a, %b %d" }}</td>      
       {% if lec.break %}
       <td>{{ lec.break }}</td>
       {% else %}

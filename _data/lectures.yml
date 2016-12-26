@@ -5,8 +5,6 @@
   date: 2016-01-27
   info: <a href="slides/lecture01/lecture01.pdf" target="_blank">01 - Introduction</a>
   week: 1
-  hw:
-    - HW0 out
   demo:
     - Virtual Machine creation / usage
 -
@@ -21,25 +19,21 @@
 -
   date: 2016-02-01
   info: <a href="slides/lecture03/lecture03.pdf" target="_blank">03 - Manipulating Files and Using Git</a>
-  hw:
-    - HW0 due
   week: 2
-  misc:
-    - Our first lecture demo!
+  demo:
+    - <a href="https://github.com/cs2043-sp16/lecture-demos/tree/master/lec03" target="_blank">File permissions gone wild</a>.
 -
   date: 2016-02-03
   info: <a href="slides/lecture04/lecture04.pdf" target="_blank">04 - More Files, Chaining Commands, and your First(?) Git Repository</a>
   demo:
-    - Forking a repository demo
+    - <a href="https://github.com/cs2043-sp16/lecture-demos/tree/master/lec04" target="_blank">Forking a repository</a>.
   misc:
     - Last day to add.
 -
   date: 2016-02-05
   info: <a href="slides/lecture05/lecture05.pdf" target="_blank">05 - Expansions and Regular Expressions</a>
-  hw:
-    - HW1 out
   demo:
-    - Basic text processing.
+    - <a href="https://github.com/cs2043-sp16/lecture-demos/tree/master/lec05" target="_blank">Basic text processing</a>.
   misc:
     - Contains two of the most useful commands you will ever use.
 #
@@ -51,21 +45,19 @@
   info: <a href="slides/lecture06/lecture06.pdf" target="_blank">06 - Intro to &#123;Scripting, Customizing, Text Editors&#125;</a>
   week: 3
   demo:
-    - Customize your terminal and VIM.
+    - <a href="https://github.com/cs2043-sp16/lecture-demos/tree/master/lec06" target="_blank">Customize your terminal and <code>vim</code></a>.
 -
   date: 2016-02-10
   info: <a href="slides/lecture07/lecture07.pdf" target="_blank">07 - Processes and Jobs</a>
   misc:
     - Last day to drop.
   demo:
-    - Mastering vlc in the terminal.
+    - <a href="https://github.com/cs2043-sp16/lecture-demos/tree/master/lec07" target="_blank">Mastering <code>vlc</code> in the terminal</a>.
 -
   date: 2016-02-12
   info: <a href="slides/lecture08/lecture08.pdf" target="_blank">08 - Superlative Streams</a>
-  hw:
-    - HW1 due.
   demo:
-    - Sed and html generation.
+    - <a href="https://github.com/cs2043-sp16/lecture-demos/tree/master/lec08" target="_blank"><code>sed</code> and html generation</a>.
 #
 # ==================
 # Week 4
@@ -76,45 +68,53 @@
   week: 4
 -
   date: 2016-02-17
-  info: '09 - Shell scripting I'
+  info: <a href="slides/lecture09/lecture09.pdf" target="_blank">09 - Bash Scripting II</a>
+  demo:
+    - <a href="https://github.com/cs2043-sp16/lecture-demos/tree/master/lec09" target="_blank">Looping through files</a>.
 -
   date: 2016-02-19
-  info: '10 - Shell scripting II'
+  info: <a href="slides/lecture10/lecture10.pdf" target="_blank">10 - Bash Scripting III, Git Merging and Diffs</a>
+  demo:
+    - <a href="https://github.com/cs2043-sp16/lecture-demos/tree/master/lec10" target="_blank">A forced merge conflict</a>.
 #
 # ==================
 # Week 5
 #
 -
   date: 2016-02-22
-  info: '11 - Awk and gawk'
+  info: <a href="slides/lecture11/lecture11.pdf" target="_blank">11 - Advanced Bash, Git Branching</a>
   week: 5
 -
   date: 2016-02-24
-  info: '12 - Python I'
+  info: <a href="slides/lecture12/lecture12.pdf" target="_blank">12 - <code>awk</code>/<code>gawk</code>, More Git Branching</a>
 -
   date: 2016-02-26
-  info: '13 - Python II'
+  info: <a href="slides/lecture13/lecture13.pdf" target="_blank">13 - <code>Python</code>, Git Branching Wrap-Up</a>
+  demo:
+    - <a href="https://github.com/cs2043-sp16/lecture-demos/tree/master/lec13" target="_blank">Creating your own branch</a>.
 #
 # ==================
 # Week 6
 #
 -
   date: 2016-02-29
-  info: '14 - Sockets and automation'
+  info: <a href="slides/lecture14/lecture14.pdf" target="_blank">14 - Package Management</a>
   week: 6
+  demo:
+    - <a href="https://github.com/cs2043-sp16/lecture-demos/tree/master/lec14" target="_blank">Debugging <code>python3</code></a>.
 -
   date: 2016-03-02
-  info: '15 - Bash revisited'
+  info: <a href="slides/lecture15/lecture15.pdf" target="_blank">15 - Build Systems, Git Merging and Working Across Branches</a>
 -
   date: 2016-03-04
-  info: '16 - Make, version control revisited'
+  info: <a href="slides/lecture16/lecture16.pdf" target="_blank">16 - Working Remotely &amp; Closing Git Branches</a>
 #
 # ==================
 # Week 7
 #
 -
   date: 2016-03-07
-  info: '17 - Package management'
+  info: 17 - Advanced Git
   week: 7
 -
   date: 2016-03-09
